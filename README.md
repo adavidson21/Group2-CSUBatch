@@ -12,11 +12,16 @@ The goal of this project is to design and implement a batch scheduling system ca
 To compile the project (starting on the root directory):
 
 ```
-gradle build
+./gradlew clean build
 ```
 
 To run the project:
 
 ```
-gradle run
+./gradlew run
+```
+
+To run the unit tests:
+```
+./gradlew clean test
 ```

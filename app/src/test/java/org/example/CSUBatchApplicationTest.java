@@ -4,10 +4,10 @@
 package org.example;
 
 import org.junit.jupiter.api.Test;
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 class CSUBatchApplicationTest {
-    @Test void appHasAGreeting() {
+    @Test void CSUBatchApplicationHasAGreeting() {
         CSUBatchApplication classUnderTest = new CSUBatchApplication();
         assertNotNull(classUnderTest.getGreeting(), "app should have a greeting");
     }
