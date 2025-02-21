@@ -3,12 +3,16 @@
  */
 package org.example;
 
+import org.example.uiController.UIController;
+
 public class CSUBatchApplication {
     public String getGreeting() {
-        return "Hello World!";
+        return "System Loading...";
     }
 
     public static void main(String[] args) {
         System.out.println(new CSUBatchApplication().getGreeting());
+        UIController UI = new UIController();
+        UI.generateUI();
     }
 }
