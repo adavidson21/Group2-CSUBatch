@@ -17,6 +17,7 @@ public class CSUBatchApplication {
         System.out.println(new CSUBatchApplication().getGreeting());
          UIController UI = new UIController();
          UI.generateUI();
+         UI.userInteraction();
 
         // CODE FOR TESTING DISPATCHER, IGNORE FOR NOW
         // WILL DELETE ONCE WE HAVE MORE OF THE PROJECT IMPLEMENTED

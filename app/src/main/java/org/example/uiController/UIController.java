@@ -10,7 +10,7 @@ public class UIController {
         System.out.println("Welcome to the CSUBatch Scheduling Application");
         System.out.println("Thank you for downloading.");
         System.out.println("This System is meant to act as a scheduling application where jobs can be added to a queue that will be arranged based \n on the selected priority. \n commands: run, list, policy_change, help, exit");
-        userInteraction();
+        //userInteraction();
     }
     public void userInteraction(){
         System.out.println("Please Enter Command: ");
