@@ -5,7 +5,12 @@ import java.util.Scanner;
  * The UI Controller is responsible for handling the user interface of the application.
  */
 public class UIController {
-    private Scanner userInput = new Scanner(System.in);
+    private final Scanner userInput;
+
+    public UIController(Scanner scanner) {
+        this.userInput = scanner;
+    }
+
     public void generateUI(){
         System.out.println("Welcome to the CSUBatch Scheduling Application");
         System.out.println("Thank you for downloading.");
