@@ -1,5 +1,6 @@
 package org.example.scheduler;
 
+import org.example.common.Job;
 import java.util.*;
 import java.util.concurrent.locks.*;
 
@@ -15,13 +16,13 @@ public class Scheduler {
     private boolean isRunning = true;
 
     public Scheduler(String policy) {
-        this.policy = policy;
+        this.policy = policy.toUpperCase();
         this.jobQueue = new ArrayList<>();
         startSchedulerThread();
     }
 
     /**
-     * Adds a new job to the scheduler.
+     * Adds a new job to the scheduler in a thread-safe manner.
      */
     public void addJob(Job job) {
         lock.lock();
@@ -67,11 +68,11 @@ public class Scheduler {
      * Determines the next job to execute based on the active scheduling policy.
      */
     private Job getNextJob() {
-        switch (policy.toUpperCase()) {
+        switch (policy) {
             case "SJF":
-                return Collections.min(jobQueue, Comparator.comparingInt(Job::getBurstTime));
+                return Collections.min(jobQueue, Comparator.comparingLong(Job::getExecutionTimeMs));
             case "PRIORITY":
-                return Collections.max(jobQueue, Comparator.comparingInt(Job::getPriority));
+                return Collections.max(jobQueue, Comparator.comparingInt(Job::getExecutionPriority));
             case "FCFS":
             default:
                 return jobQueue.get(0); // First job in queue
@@ -82,13 +83,17 @@ public class Scheduler {
      * Simulates job execution.
      */
     private void executeJob(Job job) {
-        System.out.println("Executing: " + job);
+        System.out.println("Executing: " + job.getName() + " (Priority: " + job.getExecutionPriority() +
+                ", Execution Time: " + job.getExecutionTimeMs() + "ms)");
+
         try {
-            Thread.sleep(job.getBurstTime() * 1000L); // Simulate execution
+            Thread.sleep(job.getExecutionTimeMs()); // Simulate execution
         } catch (InterruptedException e) {
             Thread.currentThread().interrupt();
         }
-        System.out.println("Completed: " + job);
+
+        job.setIsCompleted(true);
+        System.out.println("Completed: " + job.getName());
     }
 
     /**
