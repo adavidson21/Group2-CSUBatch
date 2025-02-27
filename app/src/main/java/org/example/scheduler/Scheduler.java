@@ -12,11 +12,11 @@ public class Scheduler {
     private final List<Job> jobQueue;
     private final Lock lock = new ReentrantLock();
     private final Condition condition = lock.newCondition();
-    private final String policy;
+    private final SchedulingPolicy policy;
     private boolean isRunning = true;
 
-    public Scheduler(String policy) {
-        this.policy = policy.toUpperCase();
+    public Scheduler(SchedulingPolicy policy) {
+        this.policy = policy;
         this.jobQueue = new ArrayList<>();
         startSchedulerThread();
     }
@@ -69,11 +69,11 @@ public class Scheduler {
      */
     private Job getNextJob() {
         switch (policy) {
-            case "SJF":
+            case SJF:
                 return Collections.min(jobQueue, Comparator.comparingLong(Job::getExecutionTimeMs));
-            case "PRIORITY":
+            case Priority:
                 return Collections.max(jobQueue, Comparator.comparingInt(Job::getExecutionPriority));
-            case "FCFS":
+            case FCFS:
             default:
                 return jobQueue.get(0); // First job in queue
         }
