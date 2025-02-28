@@ -1,11 +1,15 @@
 package org.example.uiController;
 import java.util.Scanner;
 
+import org.example.common.Job;
+import org.example.queueManager.QueueManager;
+
 /**
  * The UI Controller is responsible for handling the user interface of the application.
  */
 public class UIController {
     private Scanner userInput = new Scanner(System.in);
+    private QueueManager job_queue = new QueueManager();
     public void generateUI(){
         System.out.println("Welcome to the CSUBatch Scheduling Application");
         System.out.println("Thank you for downloading.");
@@ -24,19 +28,21 @@ public class UIController {
                 }
                 else{
                     try { //Try in place to ensure that the user enters the run command format correctly andif not throws an error that does not crash the system.
+                        String job_name = commandarr[1];
                         String job_time = commandarr[2];
                         String job_priority = commandarr[3];
                         int job_time_int = Integer.parseInt(job_time);
                         int job_priority_int = Integer.parseInt(job_priority);
-                        //add in queue functionality here Zac & Trenten.
-                        System.out.println("Job: " + commandarr[1] + " added to queue");
+                        Job userSubmitted = new Job(job_name, job_priority_int, job_time_int);
+                        job_queue.enqueueJob(userSubmitted);
+                        System.out.println("Job: " + job_name + " added to queue");
                     } catch (Exception e) {
                         System.out.println("Sorry time and priority must be able to be converted to integer try again");
                     }
                 }
             }
             else if(command.equals("list")){
-                //add in list operations
+                job_queue.listQueue();
             }
             else if(commandarr[0].equals("policy_change")){
                 if(commandarr.length != 2){

@@ -1,4 +1,4 @@
-package org.example.dispatcher;
+&package org.example.dispatcher;
 
 import org.example.common.Job;
 import org.example.queueManager.QueueManager;

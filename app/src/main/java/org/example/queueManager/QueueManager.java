@@ -71,5 +71,12 @@ public class QueueManager {
   public int getQueueSize() {
     return jobQueue.size();
   }
+  public void listQueue(){
+    int i = 1;
+    for(Job currJob : jobQueue){
+      System.out.println(i + ". " + currJob.getName() + " " + currJob.getExecutionPriority() + " " + currJob.getExecutionTimeMs() + "Ms");
+      i++;
+    }
+  }
 
 }
