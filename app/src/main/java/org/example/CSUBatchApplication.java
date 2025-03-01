@@ -3,9 +3,6 @@
  */
 package org.example;
 import java.util.Scanner;
-import org.example.common.Job;
-import org.example.dispatcher.Dispatcher;
-import org.example.queueManager.QueueManager;
 import org.example.uiController.UIController;
 
 public class CSUBatchApplication {
