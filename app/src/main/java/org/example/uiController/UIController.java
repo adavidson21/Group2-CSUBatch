@@ -8,12 +8,20 @@ import org.example.queueManager.QueueManager;
  * The UI Controller is responsible for handling the user interface of the application.
  */
 public class UIController {
+<<<<<<< HEAD
     private Scanner userInput;
     private QueueManager job_queue = new QueueManager();
+=======
+    private final Scanner userInput;
+>>>>>>> 5b3b1021989325aba6b96127d3ad33b89c514460
 
     public UIController(Scanner scanner) {
         this.userInput = scanner;
     }
+<<<<<<< HEAD
+=======
+
+>>>>>>> 5b3b1021989325aba6b96127d3ad33b89c514460
     public void generateUI(){
         System.out.println("Welcome to the CSUBatch Scheduling Application");
         System.out.println("Thank you for downloading.");
