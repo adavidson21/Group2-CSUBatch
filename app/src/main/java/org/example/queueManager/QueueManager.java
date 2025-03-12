@@ -1,11 +1,11 @@
 package org.example.queueManager;
-import org.example.common.Job;
-
 import java.util.LinkedList;
 import java.util.Queue;
 import java.util.concurrent.locks.Condition;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
+
+import org.example.common.Job;
 
 /**
  * The QueueManager is a wrapper around a BlockingQueue and manages the queue.
@@ -75,7 +75,7 @@ public class QueueManager {
     if (jobQueue.isEmpty() != true){
       int i = 1;
       for(Job currJob : jobQueue){
-        System.out.println(i + ". " + currJob.getName() + " " + currJob.getExecutionPriority() + " " + currJob.getExecutionTimeMs() + "Ms");
+        System.out.println(i + ". " + currJob.getName() + " " + currJob.getExecutionTimeMs() + "Ms " + currJob.getExecutionPriority() + " " + currJob.getArrivalTime());
         i++;
       }
     }
