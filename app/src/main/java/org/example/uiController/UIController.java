@@ -3,7 +3,10 @@ import java.time.LocalDateTime;
 import java.util.Scanner;
 
 import org.example.common.Job;
+import org.example.dispatcher.Dispatcher;
 import org.example.queueManager.QueueManager;
+import org.example.scheduler.Scheduler;
+import org.example.scheduler.SchedulingPolicy;
 
 /**
  * The UI Controller is responsible for handling the user interface of the application.
@@ -11,7 +14,8 @@ import org.example.queueManager.QueueManager;
 public class UIController {
     private final Scanner userInput;
     private QueueManager job_queue = new QueueManager();
-
+    private Scheduler scheduler = new Scheduler(SchedulingPolicy.FCFS);
+    private Dispatcher dispatcher = new Dispatcher(job_queue);
     public UIController(Scanner scanner) {
         this.userInput = scanner;
     }
@@ -48,7 +52,8 @@ public class UIController {
                 }
             }
             else if(command.equals("list")){
-                System.out.println("  Job_Name CPU_Time Priority Arrival_Time State");
+                System.out.println("Scheduling Policy: " + scheduler.getPolicy());
+                System.out.println(" Job_Name CPU_Time Priority Arrival_Time State");
                 job_queue.listQueue();
             }
             else if(commandarr[0].equals("policy_change")){
