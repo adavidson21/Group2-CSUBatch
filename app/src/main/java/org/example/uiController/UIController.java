@@ -1,8 +1,12 @@
 package org.example.uiController;
+import java.time.LocalDateTime;
 import java.util.Scanner;
 
 import org.example.common.Job;
+import org.example.dispatcher.Dispatcher;
 import org.example.queueManager.QueueManager;
+import org.example.scheduler.Scheduler;
+import org.example.scheduler.SchedulingPolicy;
 
 /**
  * The UI Controller is responsible for handling the user interface of the application.
@@ -10,7 +14,8 @@ import org.example.queueManager.QueueManager;
 public class UIController {
     private final Scanner userInput;
     private QueueManager job_queue = new QueueManager();
-
+    private Scheduler scheduler = new Scheduler(SchedulingPolicy.FCFS);
+    private Dispatcher dispatcher = new Dispatcher(job_queue);
     public UIController(Scanner scanner) {
         this.userInput = scanner;
     }
@@ -35,17 +40,20 @@ public class UIController {
                         String job_name = commandarr[1];
                         String job_time = commandarr[2];
                         String job_priority = commandarr[3];
+                        LocalDateTime currentDate = LocalDateTime.now();
                         int job_time_int = Integer.parseInt(job_time);
                         int job_priority_int = Integer.parseInt(job_priority);
-                        Job userSubmitted = new Job(job_name, job_priority_int, job_time_int);
+                        Job userSubmitted = new Job(job_name, job_priority_int, job_time_int, currentDate);
                         job_queue.enqueueJob(userSubmitted);
                         System.out.println("Job: " + job_name + " added to queue");
-                    } catch (Exception e) {
+                    } catch (InterruptedException | NumberFormatException e) {
                         System.out.println("Sorry time and priority must be able to be converted to integer try again");
                     }
                 }
             }
             else if(command.equals("list")){
+                System.out.println("Scheduling Policy: " + scheduler.getPolicy());
+                System.out.println(" Job_Name CPU_Time Priority Arrival_Time State");
                 job_queue.listQueue();
             }
             else if(commandarr[0].equals("policy_change")){

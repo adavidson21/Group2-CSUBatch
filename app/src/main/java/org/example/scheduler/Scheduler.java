@@ -1,8 +1,14 @@
 package org.example.scheduler;
 
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.List;
+import java.util.concurrent.locks.Condition;
+import java.util.concurrent.locks.Lock;
+import java.util.concurrent.locks.ReentrantLock;
+
 import org.example.common.Job;
-import java.util.*;
-import java.util.concurrent.locks.*;
 
 /**
  * The Scheduler governs a thread that enforces scheduling policies for submitted jobs.
@@ -101,5 +107,8 @@ public class Scheduler {
      */
     public void stopScheduler() {
         isRunning = false;
+    }
+    public SchedulingPolicy getPolicy(){
+        return policy;
     }
 }
