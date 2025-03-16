@@ -16,7 +16,7 @@ public class Dispatcher implements Runnable {
     }
 
     void executeJob(Job job) {
-        System.out.println("Executing job: " + job.getName());
+        System.out.println("Dispatcher: executing job: " + job.getName());
         try {
             Thread.sleep(job.getExecutionTimeMs());
         } catch(InterruptedException e) {
@@ -24,7 +24,7 @@ public class Dispatcher implements Runnable {
         }
         // mark job as completed
         job.setIsCompleted(true);
-        System.out.println("Job: " + job.getName() + " has completed in " + job.getExecutionTimeMs() + "ms");
+        System.out.println("Dispatcher: Job: " + job.getName() + " has completed in " + job.getExecutionTimeMs() + "ms");
 
     }
 
@@ -32,7 +32,7 @@ public class Dispatcher implements Runnable {
     public void run() {
         while(isRunning){
             try {
-                System.out.println("current queue size: " + this.queueManager.getQueueSize());
+                System.out.println("Dispatcher: current queue size: " + this.queueManager.getQueueSize());
                 // pull jobs from the queue and execute them
                 Job jobFromQueue = this.queueManager.dequeueJob();
                 if (jobFromQueue.getIsCompleted()) {
@@ -42,7 +42,7 @@ public class Dispatcher implements Runnable {
                 this.executeJob(jobFromQueue);
             } catch(InterruptedException e) {
                 Thread.currentThread().interrupt();
-                System.out.println("Dispatcher thread interrupted. Exiting process.");
+                System.out.println("Dispatcher: thread interrupted. Exiting process.");
                 e.printStackTrace();
             }
         }
