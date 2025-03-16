@@ -16,9 +16,9 @@ class SchedulerTest {
     @BeforeEach
     void setUp() {
         jobs = new ArrayList<>();
-        jobs.add(new Job("Job-1", 3, 2000));  // Execution time 2000ms, Priority 3
-        jobs.add(new Job("Job-2", 1, 1000));  // Execution time 1000ms, Priority 1
-        jobs.add(new Job("Job-3", 2, 1500));  // Execution time 1500ms, Priority 2
+        jobs.add(new Job("Job-1", 3, 2000, null));  // Execution time 2000ms, Priority 3
+        jobs.add(new Job("Job-2", 1, 1000,null));  // Execution time 1000ms, Priority 1
+        jobs.add(new Job("Job-3", 2, 1500,null));  // Execution time 1500ms, Priority 2
 
         fcfsScheduler = new Scheduler(SchedulingPolicy.FCFS);
         sjfScheduler = new Scheduler(SchedulingPolicy.SJF);
@@ -75,8 +75,8 @@ class SchedulerTest {
     @Test
     void testThreadSafeJobAddition() {
         assertDoesNotThrow(() -> {
-            Thread thread1 = new Thread(() -> fcfsScheduler.addJob(new Job("Job-4", 1, 500)));
-            Thread thread2 = new Thread(() -> fcfsScheduler.addJob(new Job("Job-5", 2, 700)));
+            Thread thread1 = new Thread(() -> fcfsScheduler.addJob(new Job("Job-4", 1, 500,null)));
+            Thread thread2 = new Thread(() -> fcfsScheduler.addJob(new Job("Job-5", 2, 700,null)));
 
             thread1.start();
             thread2.start();
