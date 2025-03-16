@@ -1,10 +1,13 @@
 package org.example.uiController;
 
+import java.time.LocalDateTime;
 import java.util.Scanner;
 
 import org.example.common.Job;
-import org.example.queueManager.QueueManager;
 import org.example.dispatcher.Dispatcher;
+import org.example.queueManager.QueueManager;
+import org.example.scheduler.Scheduler;
+import org.example.scheduler.SchedulingPolicy;
 
 /**
  * The UI Controller is responsible for handling the user interface of the application.
@@ -14,6 +17,7 @@ public class UIController {
     private QueueManager job_queue = new QueueManager();
     private Dispatcher dispatcher = new Dispatcher(job_queue);
     private Thread dispatcherThread;
+    private Scheduler scheduler = new Scheduler(SchedulingPolicy.FCFS);
 
     public UIController(Scanner scanner) {
         this.userInput = scanner;
@@ -40,13 +44,18 @@ public class UIController {
                         String job_name = commandarr[1];
                         String job_time = commandarr[2];
                         String job_priority = commandarr[3];
+                        LocalDateTime currentDate = LocalDateTime.now();
                         int job_time_int = Integer.parseInt(job_time);
                         int job_priority_int = Integer.parseInt(job_priority);
+                        Job userSubmitted = new Job(job_name, job_priority_int, job_time_int, currentDate);
                         /* TODO: The Scheduler needs to be doing this work on the next two lines, not the UIController
                            TODO: UIController just passes the params to the Scheduler */
-                        Job userSubmitted = new Job(job_name, job_priority_int, job_time_int);
                         job_queue.enqueueJob(userSubmitted);
                         System.out.println("Job: " + job_name + " added to queue");
+                        if (dispatcherThread == null) {
+                            dispatcherThread = this.startThread("Dispatcher", dispatcher);
+                        }
+                    } catch (InterruptedException | NumberFormatException e) {
 
                         // initialize dispatcher with a dedicated thread
                         if (dispatcherThread == null) {
@@ -59,6 +68,8 @@ public class UIController {
                     }
                 }
             } else if (command.equals("list")) {
+                System.out.println("Scheduling Policy: " + scheduler.getPolicy());
+                System.out.println(" Job_Name CPU_Time Priority Arrival_Time State");
                 job_queue.listQueue();
             } else if (commandarr[0].equals("policy_change")) {
                 if (commandarr.length != 2) {
