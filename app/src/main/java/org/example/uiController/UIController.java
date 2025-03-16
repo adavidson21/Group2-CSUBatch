@@ -56,14 +56,6 @@ public class UIController {
                             dispatcherThread = this.startThread("Dispatcher", dispatcher);
                         }
                     } catch (InterruptedException | NumberFormatException e) {
-
-                        // initialize dispatcher with a dedicated thread
-                        if (dispatcherThread == null) {
-                            dispatcherThread = this.startThread("Dispatcher", dispatcher);
-                        }
-
-
-                    } catch (Exception e) {
                         System.out.println("Sorry time and priority must be able to be converted to integer try again");
                     }
                 }
