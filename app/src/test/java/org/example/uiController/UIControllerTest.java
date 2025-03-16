@@ -1,45 +1,15 @@
 package org.example.uiController;
 
-import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
-import java.io.InputStream;
-import java.io.PrintStream;
-import java.util.Scanner;
-
-import org.junit.jupiter.api.AfterAll;
-import org.junit.jupiter.api.BeforeEach;
+import org.example.CSUBatchTestBase;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-public class UIControllerTest {
-    private UIController UI;
-    private final ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
-
-    @BeforeEach
-    public void setUpStreams() {
-        System.setOut(new PrintStream(outputStream)); // capture output
-    }
-
-    /**
-     * Sets the user input to the specified value.
-     * @param input The user input.
-     */
-    private void setUserInput(String input) {
-        InputStream inputStream = new ByteArrayInputStream(input.getBytes());
-        Scanner mockScanner = new Scanner(inputStream);
-        UI = new UIController(mockScanner);
-    }
-
-    /**
-     * Cleans up after tests have completed.
-     */
-    @AfterAll
-    public static void tearDown() {
-        System.setOut(System.out);
-    }
-
+/**
+ * Unit tests for the UIController class.
+ */
+public class UIControllerTest extends CSUBatchTestBase {
     @Test
     @DisplayName("Should successfully create the UI System and then move to take user input.")
     public void Commands_GenerateUI_ShouldDisplayGreeting() {
@@ -48,7 +18,7 @@ public class UIControllerTest {
 
         // Act
         UI.generateUI();
-        String output = outputStream.toString();
+        String output = getOutput();
 
         // Assert
         assertTrue(output.contains("Welcome to the CSUBatch Scheduling Application"));
@@ -65,7 +35,7 @@ public class UIControllerTest {
         UI.userInteraction();
 
         // Assert
-        assertTrue(outputStream.toString().contains("Job '" + jobName + "' added to the queue."));
+        assertTrue(getOutput().contains("Job '" + jobName + "' added to the queue."));
     }
 
     @Test
@@ -78,7 +48,7 @@ public class UIControllerTest {
         UI.userInteraction();
 
         // Assert
-        assertTrue(outputStream.toString().contains("Error: time and priority must be integers. Please try again."));
+        assertTrue(getOutput().contains("Error: time and priority must be integers. Please try again."));
     }
 
     @Test
@@ -91,7 +61,7 @@ public class UIControllerTest {
         UI.userInteraction();
 
         // Assert
-        String output = outputStream.toString();
+        String output = getOutput();
         assertTrue(output.contains("Scheduling Policy: "));
         assertTrue(output.contains("Job_Name CPU_Time Priority Arrival_Time State"));
         assertTrue(output.contains("Queue Currently Empty."));
@@ -107,7 +77,7 @@ public class UIControllerTest {
         UI.userInteraction();
 
         // Assert
-        String output = outputStream.toString();
+        String output = getOutput();
         assertTrue(output.contains("Scheduling Policy: "));
         assertTrue(output.contains("Job_Name CPU_Time Priority Arrival_Time State"));
         assertTrue(output.contains("jobname"));
@@ -123,7 +93,7 @@ public class UIControllerTest {
         UI.userInteraction();
 
         // Assert
-        String output = outputStream.toString();
+        String output = getOutput();
         assertTrue(output.contains("Available Commands:"));
         assertTrue(output.contains("run <job name> <job time> <priority>"));
     }
@@ -138,7 +108,7 @@ public class UIControllerTest {
         UI.userInteraction();
 
         // Assert
-        assertTrue(outputStream.toString().contains("policy change successful"));
+        assertTrue(getOutput().contains("policy change successful"));
     }
 
     @Test
@@ -152,6 +122,6 @@ public class UIControllerTest {
         UI.userInteraction();
 
         // Assert
-        assertTrue(outputStream.toString().contains("Sorry, the entered command is not recognized. Please try again or type 'help' for a list of commands."));
+        assertTrue(getOutput().contains("Sorry, the entered command is not recognized. Please try again or type 'help' for a list of commands."));
     }
 }
