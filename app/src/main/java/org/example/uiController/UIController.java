@@ -47,24 +47,28 @@ public class UIController {
         System.out.println("Please Enter a Command:");
         String commandLine = userInput.nextLine();
         String[] commandArr = commandLine.split(" "); //an array in place so the commands that are more than one word can be parsed.
-
         while(!"exit".equalsIgnoreCase(commandArr[0])){
-            String commandName = commandArr[0].toLowerCase();
-            switch(commandName){
-                case "run":
+            Command command = CommandParser.parseCommand(commandArr[0]);
+            if (command == Command.EXIT) {
+                System.out.println("System ending...");
+                break;
+            }
+
+            switch(command){
+                case RUN:
                     handleRunCommand(commandArr);
                     break;
-                case "list":
+                case LIST:
                     handleListCommand();
                     break;
-                case "policy_change":
+                case POLICY_CHANGE:
                     handlePolicyChangeCommand(commandArr);
                     break;
-                case "help":
+                case HELP:
                     handleHelpCommand();
                     break;
                 default:
-                    System.out.println("Sorry, the entered command " + commandName+ " is not recognized. Please try again or type 'help' for a list of commands.");
+                    System.out.println("Sorry, the entered command is not recognized. Please try again or type 'help' for a list of commands.");
                     break;
             }
 

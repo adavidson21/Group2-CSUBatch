@@ -152,6 +152,6 @@ public class UIControllerTest {
         UI.userInteraction();
 
         // Assert
-        assertTrue(outputStream.toString().contains("Sorry, the entered command " + command + " is not recognized. Please try again or type 'help' for a list of commands."));
+        assertTrue(outputStream.toString().contains("Sorry, the entered command is not recognized. Please try again or type 'help' for a list of commands."));
     }
 }
