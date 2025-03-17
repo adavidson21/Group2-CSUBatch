@@ -10,22 +10,24 @@ public class Job {
     private final LocalDateTime arrival;
 
     public Job(String name, long executionTimeMs) {
-        /* Sets the execution priority to 1 (highest priority) by default.
-        In the case where priority is not specified or "Priority" scheduling policy is not used,
-        this ensures that the priority value does not affect whatever scheduling policy is used.
-        */
-        this(name, 1, executionTimeMs, null);
+        this(name, 1, executionTimeMs, LocalDateTime.now());
+    }
+
+    public Job(String name, int executionPriority, long executionTimeMs) {
+        this(name, executionPriority, executionTimeMs, LocalDateTime.now());
     }
 
     public Job(String name, int executionPriority, long executionTimeMs, LocalDateTime date) {
         this.name = name;
         this.executionPriority = executionPriority;
         this.executionTimeMs = executionTimeMs;
-        this.arrival = date;
+        this.arrival = (date != null) ? date : LocalDateTime.now();
     }
+
     public LocalDateTime getArrivalTime(){
         return this.arrival;
     }
+
     public String getName() {
         return this.name;
     }
