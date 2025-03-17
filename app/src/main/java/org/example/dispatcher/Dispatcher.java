@@ -39,4 +39,9 @@ public class Dispatcher implements Runnable {
             }
         }
     }
+
+    public void requestStop() {
+        isRunning = false;
+        Thread.currentThread().interrupt(); // when blocked on 'take()', exit promptly
+    }
 }

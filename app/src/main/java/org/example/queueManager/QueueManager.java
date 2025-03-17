@@ -7,6 +7,8 @@ import java.util.concurrent.locks.ReentrantLock;
 
 import org.example.common.Job;
 
+import static org.example.constants.ConsoleMessages.QUEUE_EMPTY_MESSAGE;
+
 /**
  * The QueueManager is a wrapper around a BlockingQueue and manages the queue.
  */
@@ -72,7 +74,7 @@ public class QueueManager {
     return jobQueue.size();
   }
   public void listQueue(){
-    if (jobQueue.isEmpty() != true){
+    if (!jobQueue.isEmpty()){
       int i = 1;
       for(Job currJob : jobQueue){
         System.out.println(i + ". " + currJob.getName() + " " + currJob.getExecutionTimeMs() + "Ms " + currJob.getExecutionPriority() + " " + currJob.getArrivalTime());
@@ -80,7 +82,7 @@ public class QueueManager {
       }
     }
     else{
-      System.out.println("Queue Currently Empty.");
+      System.out.println(QUEUE_EMPTY_MESSAGE);
     }
   }
 
