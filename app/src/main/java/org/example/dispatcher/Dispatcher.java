@@ -1,41 +1,49 @@
 package org.example.dispatcher;
 
 import org.example.common.Job;
-import java.util.concurrent.BlockingQueue;
+import org.example.queueManager.QueueManager;
 
 /**
- * Dispatcher receives jobs from the Scheduler's scheduled job queue and executes them.
+ * The Dispatcher governs a thread that executes submitted jobs.
  */
 public class Dispatcher implements Runnable {
-    private final BlockingQueue<Job> scheduledJobs;
+    private final QueueManager queueManager;
+
     private volatile boolean isRunning = true;
 
-    public Dispatcher(BlockingQueue<Job> scheduledJobs) {
-        this.scheduledJobs = scheduledJobs;
+    public Dispatcher(QueueManager queueManager) {
+        this.queueManager = queueManager;
     }
 
     void executeJob(Job job) {
-        System.out.println("Executing: " + job.getName() +
-                " (Priority: " + job.getExecutionPriority() +
-                ", Execution Time: " + job.getExecutionTimeMs() + "ms)");
+        System.out.println("Dispatcher: executing job: " + job.getName());
         try {
             Thread.sleep(job.getExecutionTimeMs());
-        } catch (InterruptedException e) {
+        } catch(InterruptedException e) {
             Thread.currentThread().interrupt();
         }
+        // mark job as completed
         job.setIsCompleted(true);
-        System.out.println("Completed: " + job.getName());
+        System.out.println("Dispatcher: Job: " + job.getName() + " has completed in " + job.getExecutionTimeMs() + "ms");
+
     }
 
     @Override
     public void run() {
-        while (isRunning) {
+        while(isRunning){
             try {
-                Job job = scheduledJobs.take(); // Block until a job is available
-                executeJob(job);
-            } catch (InterruptedException e) {
+                System.out.println("Dispatcher: current queue size: " + this.queueManager.getQueueSize());
+                // pull jobs from the queue and execute them
+                Job jobFromQueue = this.queueManager.dequeueJob();
+                if (jobFromQueue.getIsCompleted()) {
+                    isRunning = false;
+                    break;
+                }
+                this.executeJob(jobFromQueue);
+            } catch(InterruptedException e) {
                 Thread.currentThread().interrupt();
-                System.out.println("Dispatcher interrupted.");
+                System.out.println("Dispatcher: thread interrupted. Exiting process.");
+                e.printStackTrace();
             }
         }
     }
