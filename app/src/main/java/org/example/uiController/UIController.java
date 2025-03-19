@@ -1,4 +1,5 @@
 package org.example.uiController;
+
 import java.time.LocalDateTime;
 import java.util.Scanner;
 
@@ -13,6 +14,7 @@ import org.example.scheduler.SchedulingPolicy;
  */
 public class UIController {
     private final Scanner userInput;
+
     private final QueueManager jobQueue;
     private final Scheduler scheduler;
     private final Dispatcher dispatcher;
@@ -24,6 +26,7 @@ public class UIController {
      * and to allow for dependency injection for testing if needed.
      * @param scanner The scanner.
      */
+
     public UIController(Scanner scanner) {
         this.userInput = scanner;
         this.jobQueue = new QueueManager();
@@ -34,12 +37,14 @@ public class UIController {
     /**
      * Prints the initial welcome and instructions for the application.
      */
-    public void generateUI(){
+    public void generateUI() {
+
         System.out.println("Welcome to the CSUBatch Scheduling Application");
         System.out.println("Thank you for downloading.");
         System.out.println("This System is meant to act as a scheduling application where jobs can be added to a queue that will be arranged based \n on the selected priority.");
         System.out.println("Commands: run, list, policy_change, help, exit");
     }
+
 
     /**
      * User interaction handler that parses commands as they are inputted by the user.
@@ -149,6 +154,36 @@ public class UIController {
         System.out.println("policy_change <policy> - will change the policy to the new entered one and restructure queue.");
         System.out.println("exit - End System processes and perform benchmark on close");
     }
+
+    /**
+     * Starts a new thread for either dispatcher or scheduler
+     *
+     * @param className - The name of the class that the thread is being started for
+     * @param runnable  - The runnable object that the thread will execute (scheduler or dispatcher)
+     */
+    Thread startThread(String className, Runnable runnable) {
+        Thread thread = new Thread(runnable);
+        thread.start();
+        System.out.printf("%s: Started thread. %n", className);
+        return thread;
+    }
+
+    /**
+     * Ends a thread and returns it to the resource pool
+     *
+     * @param className - The name of the class that the thread is being ended for
+     * @param thread    - The thread that is being returned to the resource pool
+     */
+    void endThread(String className, Thread thread) {
+        try {
+            if (thread != null) {
+                System.out.printf("%s: Returning thread to resource pool. Exiting process. %n", className);
+                thread.join();
+            }
+        } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
+            e.printStackTrace();
+        }
 
     /**
      * Starts a new thread for either dispatcher or scheduler
