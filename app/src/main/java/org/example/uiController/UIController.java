@@ -16,6 +16,7 @@ public class UIController {
     private final QueueManager jobQueue;
     private final Scheduler scheduler;
     private final Dispatcher dispatcher;
+    private Thread dispatcherThread;
 
     /**
      * The UIController constructor.
@@ -80,6 +81,8 @@ public class UIController {
             }
         }
         System.out.println("System ending...");
+        // cleanup loose threads
+        this.endThread("Dispatcher", dispatcherThread);
     }
 
     /**
@@ -98,11 +101,13 @@ public class UIController {
             int jobTime = Integer.parseInt(command[2]);
             int jobPriority = Integer.parseInt(command[3]);
             LocalDateTime currentDate = LocalDateTime.now();
-            Job userSubmittiedJob = new Job(jobName, jobPriority, jobTime, currentDate);
+            Job userSubmittedJob = new Job(jobName, jobPriority, jobTime, currentDate);
 
-            jobQueue.enqueueJob(userSubmittiedJob);
+            jobQueue.enqueueJob(userSubmittedJob);
             System.out.println("Job '" + jobName + "' added to the queue.");
-
+            if (dispatcherThread == null) {
+                dispatcherThread = this.startThread("Dispatcher", dispatcher);
+            }
         } catch (NumberFormatException e) {
             System.out.println("Error: time and priority must be integers. Please try again.");
         } catch (InterruptedException e) {
@@ -143,5 +148,36 @@ public class UIController {
         System.out.println("list - Print out the current job queue.");
         System.out.println("policy_change <policy> - will change the policy to the new entered one and restructure queue.");
         System.out.println("exit - End System processes and perform benchmark on close");
+    }
+
+    /**
+     * Starts a new thread for either dispatcher or scheduler
+     *
+     * @param className - The name of the class that the thread is being started for
+     * @param runnable  - The runnable object that the thread will execute (scheduler or dispatcher)
+     */
+    Thread startThread(String className, Runnable runnable) {
+        Thread thread = new Thread(runnable);
+        thread.start();
+        System.out.printf("%s: Started thread. %n", className);
+        return thread;
+    }
+
+    /**
+     * Ends a thread and returns it to the resource pool
+     *
+     * @param className - The name of the class that the thread is being ended for
+     * @param thread    - The thread that is being returned to the resource pool
+     */
+    void endThread(String className, Thread thread) {
+        try {
+            if (thread != null) {
+                System.out.printf("%s: Returning thread to resource pool. Exiting process. %n", className);
+                thread.join();
+            }
+        } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
+            e.printStackTrace();
+        }
     }
 }
