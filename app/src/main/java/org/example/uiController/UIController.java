@@ -35,6 +35,10 @@ public class UIController {
         String command = userInput.nextLine();
         String[] commandarr = command.split(" "); //an array in place so the commands that are more than one word can be parsed.
         while (!"exit".equals(command)) {
+            if (!commandarr[0].equals("batch_job")) {
+                dispatcher.setIsBatchMode(false);
+            }
+
             if (commandarr[0].equals("run")) {
                 if (commandarr.length != 4) {
                     System.out.println("Invalid run command please try again");
@@ -63,6 +67,24 @@ public class UIController {
                 System.out.println("Scheduling Policy: " + scheduler.getPolicy());
                 System.out.println(" Job_Name CPU_Time Priority Arrival_Time State");
                 job_queue.listQueue();
+            } else if (commandarr[0].equals("batch_job")) {
+                if (!dispatcher.getIsBatchMode()) {
+                    System.out.println("Entering batch_job mode. Please see micro_benchmarks.log file for results.");
+                }
+                if (commandarr.length != 2) {
+                    System.out.println("Invalid batch_job command please try again");
+                }
+                Job batchJob = new Job(commandarr[0], 1, Integer.parseInt(commandarr[1]), LocalDateTime.now());
+                dispatcher.setIsBatchMode(true);
+                try {
+                    job_queue.enqueueJob(batchJob);
+                } catch (InterruptedException e) {
+                    System.out.println("Error: Could not enqueue batch job: " + e.getMessage());
+                }
+                if (dispatcherThread == null) {
+                    dispatcherThread = this.startThread("Dispatcher", dispatcher);
+                }
+
             } else if (commandarr[0].equals("policy_change")) {
                 if (commandarr.length != 2) {
                     System.out.println("invald policy_change command please try again");
