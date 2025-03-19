@@ -1,72 +1,46 @@
 package org.example.uiController;
 
-import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
-import java.io.InputStream;
-import java.io.PrintStream;
-import java.util.Scanner;
-
-import org.junit.jupiter.api.AfterAll;
-import org.junit.jupiter.api.BeforeEach;
+import org.example.CSUBatchTestBase;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-public class UIControllerTest {
-    private UIController UI;
-    private final ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
-
-    @BeforeEach
-    public void setUpStreams() {
-        System.setOut(new PrintStream(outputStream)); // capture output
-    }
-
-    /**
-     * Sets the user input to the specified value.
-     * @param input The user input.
-     */
-    private void setUserInput(String input) {
-        InputStream inputStream = new ByteArrayInputStream(input.getBytes());
-        Scanner mockScanner = new Scanner(inputStream);
-        UI = new UIController(mockScanner);
-    }
-
-    /**
-     * Cleans up after tests have completed.
-     */
-    @AfterAll
-    public static void tearDown() {
-        System.setOut(System.out);
-    }
-
+/**
+ * Unit tests for the UIController class.
+ */
+public class UIControllerTest extends CSUBatchTestBase {
     @Test
     @DisplayName("Should successfully create the UI System and then move to take user input.")
-    public void testGenerate() {
+    public void Commands_GenerateUI_ShouldDisplayGreeting() {
+        // Arrange
         setUserInput(""); // No input needed for this test
+
+        // Act
         UI.generateUI();
+        String output = getOutput();
 
-        String expectedOutput = "Welcome to the CSUBatch Scheduling Application";
-
-        assertTrue(outputStream.toString().contains(expectedOutput.trim()));
+        // Assert
+        assertTrue(output.contains("Welcome to the CSUBatch Scheduling Application"));
     }
 
     @Test
-    @DisplayName("Test valid 'run' command")
-    public void testValidRunCommand() {
+    @DisplayName("Should successfully add the job to the queue when a valid 'run' command is entered.")
+    public void Commands_ValidRun_ShouldAddJobToQueue() {
         // Arrange
-        setUserInput("run fishing 100 10\nexit\n");
+        String jobName = "test-job";
+        setUserInput("run " + jobName + " 100 10\nexit\n");
 
         // Act
         UI.userInteraction();
 
         // Assert
-        assertTrue(outputStream.toString().contains("Job: fishing added to queue"));
+        assertTrue(getOutput().contains("Job '" + jobName + "' added to the queue."));
     }
 
     @Test
-    @DisplayName("Test invalid 'run' command (wrong format)")
-    public void testInvalidRunCommand() {
+    @DisplayName("Should display an error message when ana invalid 'run' command (wrong format) is entered.")
+    public void Commands_InvalidRun_ShouldNotAddJobToQueue() {
         // Arrange
         setUserInput("run fish hello ten\nexit\n");
 
@@ -74,12 +48,12 @@ public class UIControllerTest {
         UI.userInteraction();
 
         // Assert
-        assertTrue(outputStream.toString().contains("Sorry time and priority must be able to be converted to integer try again"));
+        assertTrue(getOutput().contains("Error: time and priority must be integers. Please try again."));
     }
 
     @Test
-    @DisplayName("Test 'list' command")
-    public void testListCommand() {
+    @DisplayName("Should successfully display an empty message when the 'list' command is entered without jobs queued.")
+    public void Commands_ValidList_ShouldDisplayEmptyQueue() {
         // Arrange
         setUserInput("list\nexit\n");
 
@@ -87,13 +61,31 @@ public class UIControllerTest {
         UI.userInteraction();
 
         // Assert
-        // TODO: Uncomment assertion/update expectation once implemented.
-        // assertTrue(outputStream.toString().contains("Listing all jobs"));
+        String output = getOutput();
+        assertTrue(output.contains("Scheduling Policy: "));
+        assertTrue(output.contains("Job_Name CPU_Time Priority Arrival_Time State"));
+        assertTrue(output.contains("Queue Currently Empty."));
     }
 
     @Test
-    @DisplayName("Test 'help' command")
-    public void testHelpCommand() {
+    @DisplayName("Should successfully list the job queue when the 'list' command is entered with jobs queued.")
+    public void Commands_ValidList_ShouldDisplayQueuedJobs() {
+        // Arrange
+        setUserInput("run jobname 100 10\nlist\nexit\n");
+
+        // Act
+        UI.userInteraction();
+
+        // Assert
+        String output = getOutput();
+        assertTrue(output.contains("Scheduling Policy: "));
+        assertTrue(output.contains("Job_Name CPU_Time Priority Arrival_Time State"));
+        assertTrue(output.contains("jobname"));
+    }
+
+    @Test
+    @DisplayName("Should successfully display the 'help' options when the 'help' command is entered.")
+    public void Commands_ValidHelp_ShouldDisplayHelpOptions() {
         // Arrange
         setUserInput("help\nexit\n");
 
@@ -101,14 +93,14 @@ public class UIControllerTest {
         UI.userInteraction();
 
         // Assert
-        assertTrue(outputStream.toString().contains("User has enter help"));
-        assertTrue(outputStream.toString().contains("Command List:"));
-        assertTrue(outputStream.toString().contains("run <job name> <job time> <priority>"));
+        String output = getOutput();
+        assertTrue(output.contains("Available Commands:"));
+        assertTrue(output.contains("run <job name> <job time> <priority>"));
     }
 
     @Test
-    @DisplayName("Test 'policy_change' command")
-    public void testPolicyChangeCommand() {
+    @DisplayName("Should successfully display the policy change Test 'policy_change' command")
+    public void Commands_ValidPolicyChange_ShouldSuccessfullyChangePolicy() {
         // Arrange
         setUserInput("policy_change fcfs\nexit\n");
 
@@ -116,40 +108,20 @@ public class UIControllerTest {
         UI.userInteraction();
 
         // Assert
-        assertTrue(outputStream.toString().contains("policy change successful"));
+        assertTrue(getOutput().contains("policy change successful"));
     }
 
     @Test
-    @DisplayName("Test invalid input command")
-    public void testInvalidInput() {
+    @DisplayName("Should display an error message when the input is not a valid command")
+    public void Command_InvalidInput_ShouldDisplayErrorMessage() {
         // Arrange
-        setUserInput("invalid input\nexit\n");
+        String command = "invalid";
+        setUserInput(command + "\nexit\n");
 
         // Act
         UI.userInteraction();
 
         // Assert
-        assertTrue(outputStream.toString().contains("Sorry command unrecognized try again"));
-    }
-
-    @Test
-    @DisplayName("Test full interaction flow")
-    public void testFullInteraction() {
-        // Arrange
-        setUserInput("run fishing 100 10\nlist\nhelp\npolicy_change fcfs\nrun fish hello ten\ninvalid input\nexit\n");
-
-        // Act
-        UI.userInteraction();
-
-        // Assert
-        String output = outputStream.toString();
-        assertTrue(output.contains("Job: fishing added to queue"));
-        //   TODO: Add assertions for functionality as it is developed.
-        //   assertTrue(output.contains("Listing all jobs"));
-        assertTrue(output.contains("User has enter help"));
-        assertTrue(output.contains("policy change successful"));
-        assertTrue(output.contains("Sorry time and priority must be able to be converted to integer try again"));
-        assertTrue(output.contains("Sorry command unrecognized try again"));
-        assertTrue(output.contains("System ending..."));
+        assertTrue(getOutput().contains("Sorry, the entered command is not recognized. Please try again or type 'help' for a list of commands."));
     }
 }
