@@ -30,8 +30,8 @@ public class DispatcherTest {
 
     @Test
     @DisplayName("It should execute jobs and mark them as completed.")
-    public void testExecuteJob() throws InterruptedException {
-        Job job = new Job("Job1", 1, 1000);
+    public void testExecuteJob() {
+        Job job = new Job("Job1", 1, 1000, null);
         dispatcher.executeJob(job);
         //assert that the job has completed
         assertTrue(job.getIsCompleted());
@@ -40,8 +40,8 @@ public class DispatcherTest {
     @Test
     @DisplayName("It should run the dispatcher thread and process multiple jobs.")
     public void testRun() throws InterruptedException {
-        Job job1 = new Job("Job1", 1, 500);
-        Job job2 = new Job("Job2", 1, 500);
+        Job job1 = new Job("Job1", 1, 500, null);
+        Job job2 = new Job("Job2", 1, 500, null);
 
         queueManager.enqueueJob(job1);
         queueManager.enqueueJob(job2);

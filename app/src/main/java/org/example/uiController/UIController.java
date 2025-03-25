@@ -14,81 +14,145 @@ import org.example.scheduler.SchedulingPolicy;
  */
 public class UIController {
     private final Scanner userInput;
-    private QueueManager job_queue = new QueueManager();
-    private Dispatcher dispatcher = new Dispatcher(job_queue);
+
+    private final QueueManager jobQueue;
+    private final Scheduler scheduler;
+    private final Dispatcher dispatcher;
     private Thread dispatcherThread;
-    private Scheduler scheduler = new Scheduler(SchedulingPolicy.FCFS);
+
+    /**
+     * The UIController constructor.
+     * Initializes the QueueManager, Scheduler, and Dispatcher to encapsulate dependencies
+     * and to allow for dependency injection for testing if needed.
+     * @param scanner The scanner.
+     */
 
     public UIController(Scanner scanner) {
         this.userInput = scanner;
+        this.jobQueue = new QueueManager();
+        this.scheduler = new Scheduler(SchedulingPolicy.FCFS);
+        this.dispatcher = new Dispatcher(jobQueue);
     }
 
+    /**
+     * Prints the initial welcome and instructions for the application.
+     */
     public void generateUI() {
+
         System.out.println("Welcome to the CSUBatch Scheduling Application");
         System.out.println("Thank you for downloading.");
-        System.out.println("This System is meant to act as a scheduling application where jobs can be added to a queue that will be arranged based \n on the selected priority. \n commands: run, list, policy_change, help, exit");
-        //userInteraction();
+        System.out.println("This System is meant to act as a scheduling application where jobs can be added to a queue that will be arranged based \n on the selected priority.");
+        System.out.println("Commands: run, list, policy_change, help, exit");
     }
 
-    public void userInteraction() {
-        System.out.println("Please Enter Command: ");
-        String command = userInput.nextLine();
-        String[] commandarr = command.split(" "); //an array in place so the commands that are more than one word can be parsed.
-        while (!"exit".equals(command)) {
-            if (commandarr[0].equals("run")) {
-                if (commandarr.length != 4) {
-                    System.out.println("Invalid run command please try again");
-                    break;
-                } else {
-                    try { //Try in place to ensure that the user enters the run command format correctly and if not throws an error that does not crash the system.
-                        String job_name = commandarr[1];
-                        String job_time = commandarr[2];
-                        String job_priority = commandarr[3];
-                        LocalDateTime currentDate = LocalDateTime.now();
-                        int job_time_int = Integer.parseInt(job_time);
-                        int job_priority_int = Integer.parseInt(job_priority);
-                        Job userSubmitted = new Job(job_name, job_priority_int, job_time_int, currentDate);
-                        /* TODO: The Scheduler needs to be doing this work on the next two lines, not the UIController
-                           TODO: UIController just passes the params to the Scheduler */
-                        job_queue.enqueueJob(userSubmitted);
-                        System.out.println("Job: " + job_name + " added to queue");
-                        if (dispatcherThread == null) {
-                            dispatcherThread = this.startThread("Dispatcher", dispatcher);
-                        }
-                    } catch (InterruptedException | NumberFormatException e) {
-                        System.out.println("Sorry time and priority must be able to be converted to integer try again");
-                    }
-                }
-            } else if (command.equals("list")) {
-                System.out.println("Scheduling Policy: " + scheduler.getPolicy());
-                System.out.println(" Job_Name CPU_Time Priority Arrival_Time State");
-                job_queue.listQueue();
-            } else if (commandarr[0].equals("policy_change")) {
-                if (commandarr.length != 2) {
-                    System.out.println("invald policy_change command please try again");
-                } else {
-                    //Enter policy change functionality here.
-                    System.out.println("policy change successful");
-                }
-            } else if (command.equals("help")) {
-                System.out.println("User has enter help");
-                System.out.println("Command List:");
-                System.out.println("run <job name> <job time> <priority> - Will add a job to the system");
-                System.out.println("list - Print out the current job queue.");
-                System.out.println("policy_change <policy> - will change the policy to the new entered one and restructure queue.");
-                System.out.println("exit - End System processes and perform benchmark on close");
-            } else {
-                System.out.println("Sorry command unrecognized try again");
+
+    /**
+     * User interaction handler that parses commands as they are inputted by the user.
+     */
+    public void userInteraction(){
+        System.out.println("Please Enter a Command:");
+        String commandLine = userInput.nextLine();
+        String[] commandArr = commandLine.split(" "); //an array in place so the commands that are more than one word can be parsed.
+        while(!"exit".equalsIgnoreCase(commandArr[0])){
+            Command command = CommandParser.parseCommand(commandArr[0]);
+            if (command == Command.EXIT) {
+                System.out.println("System ending...");
+                break;
             }
-            System.out.println("Please Enter a command:");
-            commandarr = null; //empties the array so new commands can be entered
-            command = userInput.nextLine();
-            commandarr = command.split(" "); //refills the array with new entries.
+
+            switch(command){
+                case RUN:
+                    handleRunCommand(commandArr);
+                    break;
+                case LIST:
+                    handleListCommand();
+                    break;
+                case POLICY_CHANGE:
+                    handlePolicyChangeCommand(commandArr);
+                    break;
+                case HELP:
+                    handleHelpCommand();
+                    break;
+                default:
+                    System.out.println("Sorry, the entered command is not recognized. Please try again or type 'help' for a list of commands.");
+                    break;
+            }
+
+            System.out.println("\nPlease Enter Command:");
+            commandLine = userInput.nextLine();
+            commandArr = commandLine.split(" ");
+            if (commandArr.length == 0) {
+                commandArr = new String[]{" "};  // Set default to avoid array index issues
+            }
         }
         System.out.println("System ending...");
         // cleanup loose threads
         this.endThread("Dispatcher", dispatcherThread);
+    }
 
+    /**
+     * Handles the run command when it is submitted by the user.
+     * Ensures that the user enters the run command format correctly
+     * If not valid, an error is thrown that does not crash the system.
+     * @param command The command.
+     */
+    private void handleRunCommand(String[] command){
+        if (command.length != 4) {
+            System.out.println("Invalid run command, please try again. \nUsage: run <jobName> <cpuTime> <priority>");
+            return;
+        }
+        try {
+            String jobName = command[1];
+            int jobTime = Integer.parseInt(command[2]);
+            int jobPriority = Integer.parseInt(command[3]);
+            LocalDateTime currentDate = LocalDateTime.now();
+            Job userSubmittedJob = new Job(jobName, jobPriority, jobTime, currentDate);
+
+            jobQueue.enqueueJob(userSubmittedJob);
+            System.out.println("Job '" + jobName + "' added to the queue.");
+            if (dispatcherThread == null) {
+                dispatcherThread = this.startThread("Dispatcher", dispatcher);
+            }
+        } catch (NumberFormatException e) {
+            System.out.println("Error: time and priority must be integers. Please try again.");
+        } catch (InterruptedException e) {
+            System.out.println("Unexpected error while enqueuing job. Please try again.");
+        }
+    }
+
+    /**
+     * Handles the list command when it is submitted by the user.
+     * Lists current scheduling policy and all jobs in the job queue.
+     */
+    private void handleListCommand(){
+        System.out.println("Scheduling Policy: " + scheduler.getPolicy());
+        System.out.println("Job_Name CPU_Time Priority Arrival_Time State");
+        jobQueue.listQueue();
+    }
+
+    /**
+     * Handles the policy_change command when it is submitted by the user.
+     * @param command The commands.
+     */
+    private void handlePolicyChangeCommand(String[] command){
+        if(command.length != 2){
+            System.out.println("Invalid policy_change command, please try again. \nUsage: policy_change <policy>");
+        }
+        else{
+            //TODO: Add policy change functionality here.
+            System.out.println("policy change successful");
+        }
+    }
+
+    /**
+     * Handles the help command when it is submitted by the user.
+     */
+    private void handleHelpCommand(){
+        System.out.println("Available Commands:");
+        System.out.println("run <job name> <job time> <priority> - Will add a job to the system");
+        System.out.println("list - Print out the current job queue.");
+        System.out.println("policy_change <policy> - will change the policy to the new entered one and restructure queue.");
+        System.out.println("exit - End System processes and perform benchmark on close");
     }
 
     /**
@@ -114,6 +178,7 @@ public class UIController {
         try {
             if (thread != null) {
                 System.out.printf("%s: Returning thread to resource pool. Exiting process. %n", className);
+                thread.interrupt();
                 thread.join();
             }
         } catch (InterruptedException e) {

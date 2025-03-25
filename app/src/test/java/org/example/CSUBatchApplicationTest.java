@@ -3,12 +3,24 @@
  */
 package org.example;
 
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 
+/**
+ * Unit tests for the CSUBatchApplication class.
+ */
 class CSUBatchApplicationTest {
-    @Test void testCSUBatchApplicationHasAGreeting() {
+    @Test
+    @DisplayName("Should successfully display a greeting when the application is started.")
+    public void testCSUBatchApplicationHasAGreeting() {
+        // Arrange
         CSUBatchApplication classUnderTest = new CSUBatchApplication();
-        assertNotNull(classUnderTest.getGreeting(), "app should have a greeting");
+
+        // Act
+        String greeting = classUnderTest.getGreeting();
+
+        // Assert
+        assertNotNull(greeting, "app should have a greeting");
     }
 }
