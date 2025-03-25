@@ -178,36 +178,7 @@ public class UIController {
         try {
             if (thread != null) {
                 System.out.printf("%s: Returning thread to resource pool. Exiting process. %n", className);
-                thread.join();
-            }
-        } catch (InterruptedException e) {
-            Thread.currentThread().interrupt();
-            e.printStackTrace();
-        }
-
-    /**
-     * Starts a new thread for either dispatcher or scheduler
-     *
-     * @param className - The name of the class that the thread is being started for
-     * @param runnable  - The runnable object that the thread will execute (scheduler or dispatcher)
-     */
-    Thread startThread(String className, Runnable runnable) {
-        Thread thread = new Thread(runnable);
-        thread.start();
-        System.out.printf("%s: Started thread. %n", className);
-        return thread;
-    }
-
-    /**
-     * Ends a thread and returns it to the resource pool
-     *
-     * @param className - The name of the class that the thread is being ended for
-     * @param thread    - The thread that is being returned to the resource pool
-     */
-    void endThread(String className, Thread thread) {
-        try {
-            if (thread != null) {
-                System.out.printf("%s: Returning thread to resource pool. Exiting process. %n", className);
+                thread.interrupt();
                 thread.join();
             }
         } catch (InterruptedException e) {

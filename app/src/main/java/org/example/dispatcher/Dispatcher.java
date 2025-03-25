@@ -43,6 +43,7 @@ public class Dispatcher implements Runnable {
             } catch(InterruptedException e) {
                 Thread.currentThread().interrupt();
                 System.out.println("Dispatcher: thread interrupted. Exiting process.");
+                isRunning = false;
                 e.printStackTrace();
             }
         }
