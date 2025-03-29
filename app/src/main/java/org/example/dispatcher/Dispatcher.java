@@ -46,7 +46,7 @@ public class Dispatcher implements Runnable {
     }
 
     void executeJob(Job job) {
-        System.out.printf("Dispatcher: executing job: %s", job.getName());
+        System.out.printf("Dispatcher: executing job: %s.%n", job.getName());
         try {
             Thread.sleep(job.getExecutionTime());
         } catch(InterruptedException e) {
@@ -54,7 +54,7 @@ public class Dispatcher implements Runnable {
         }
         // mark job as completed
         job.setIsCompleted(true);
-        System.out.printf("Dispatcher: Job: %s has completed in %dms seconds. %n", job.getName(), job.getExecutionTime());
+        System.out.printf("Dispatcher: Job: %s has completed in %d seconds. %n", job.getName(), job.getExecutionTime() / 1000);
 
     }
 

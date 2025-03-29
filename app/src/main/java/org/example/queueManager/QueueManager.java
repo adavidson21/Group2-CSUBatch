@@ -76,7 +76,8 @@ public class QueueManager {
     if (!jobQueue.isEmpty()) {
       int i = 1;
       for (Job currJob : jobQueue) {
-        System.out.println(i + ". " + currJob.getName() + " " + currJob.getExecutionTime() / 1000 + " seconds " + currJob.getExecutionPriority() + " " + currJob.getArrivalTime());
+        long formattedSeconds = currJob.getExecutionTime() / 1000;
+        System.out.println(i + ". " + currJob.getName() + " " + formattedSeconds + " seconds " + currJob.getExecutionPriority() + " " + currJob.getArrivalTime());
         i++;
       }
     } else {

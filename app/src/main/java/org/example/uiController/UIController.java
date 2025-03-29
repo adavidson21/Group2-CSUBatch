@@ -164,7 +164,7 @@ public class UIController {
     /**
      * Handles the batch_job micro benchmarks command when it is submitted by the user.
      */
-    private void handleBatchJobCommand(String[] command) {
+    void handleBatchJobCommand(String[] command) {
         if (!this.dispatcher.getIsBatchMode()) {
             System.out.println("\nEntering batch_job mode. Please see micro_benchmarks.log file for results.");
         }
@@ -189,7 +189,7 @@ public class UIController {
      * @param className - The name of the class that the thread is being started for
      * @param runnable  - The runnable object that the thread will execute (scheduler or dispatcher)
      */
-    Thread startThread(String className, Runnable runnable) {
+    private Thread startThread(String className, Runnable runnable) {
         Thread thread = new Thread(runnable);
         thread.start();
         return thread;
@@ -201,7 +201,7 @@ public class UIController {
      * @param className - The name of the class that the thread is being ended for
      * @param thread    - The thread that is being returned to the resource pool
      */
-    void endThread(String className, Thread thread) {
+    private void endThread(String className, Thread thread) {
         try {
             if (thread != null) {
                 System.out.printf("%s: Returning thread to resource pool. Exiting process. %n", className);
