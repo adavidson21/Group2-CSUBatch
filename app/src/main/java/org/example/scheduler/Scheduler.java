@@ -76,7 +76,7 @@ public class Scheduler {
     private Job getNextJob() {
         switch (policy) {
             case SJF:
-                return Collections.min(jobQueue, Comparator.comparingLong(Job::getExecutionTimeMs));
+                return Collections.min(jobQueue, Comparator.comparingLong(Job::getExecutionTime));
             case Priority:
                 return Collections.max(jobQueue, Comparator.comparingInt(Job::getExecutionPriority));
             case FCFS:
@@ -90,10 +90,10 @@ public class Scheduler {
      */
     private void executeJob(Job job) {
         System.out.println("Executing: " + job.getName() + " (Priority: " + job.getExecutionPriority() +
-                ", Execution Time: " + job.getExecutionTimeMs() + "ms)");
+                ", Execution Time: " + job.getExecutionTime() + "ms)");
 
         try {
-            Thread.sleep(job.getExecutionTimeMs()); // Simulate execution
+            Thread.sleep(job.getExecutionTime()); // Simulate execution
         } catch (InterruptedException e) {
             Thread.currentThread().interrupt();
         }

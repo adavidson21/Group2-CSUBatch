@@ -39,7 +39,7 @@ public class UIControllerTest extends CSUBatchTestBase {
     }
 
     @Test
-    @DisplayName("Should display an error message when ana invalid 'run' command (wrong format) is entered.")
+    @DisplayName("Should display an error message when an invalid 'run' command (wrong format) is entered.")
     public void Commands_InvalidRun_ShouldNotAddJobToQueue() {
         // Arrange
         setUserInput("run fish hello ten\nexit\n");
@@ -95,7 +95,7 @@ public class UIControllerTest extends CSUBatchTestBase {
         // Assert
         String output = getOutput();
         assertTrue(output.contains("Available Commands:"));
-        assertTrue(output.contains("run <job name> <job time> <priority>"));
+        assertTrue(output.contains("run <job name> <job time in seconds> <priority>"));
     }
 
     @Test
@@ -123,5 +123,19 @@ public class UIControllerTest extends CSUBatchTestBase {
 
         // Assert
         assertTrue(getOutput().contains("Sorry, the entered command is not recognized. Please try again or type 'help' for a list of commands."));
+    }
+
+    @Test
+    @DisplayName("Should enter batch mode when the 'batch_job' command is entered.")
+    public void Command_BatchMode_ShouldEngageBatchMode() {
+        // Arrange
+        String[] command = {"batch_job", "5"};
+        setUserInput("command\nexit\n");
+
+        // Act
+        UI.handleBatchJobCommand(command);
+
+        // Assert
+        assertTrue(getOutput().contains("Entering batch_job mode. Please see micro_benchmarks.log file for results."));
     }
 }

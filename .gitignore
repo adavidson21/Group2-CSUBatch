@@ -30,3 +30,6 @@ bin/
 
 # Ignore Gradle build output directory
 build
+
+# ignore file handler lock files
+*.lck

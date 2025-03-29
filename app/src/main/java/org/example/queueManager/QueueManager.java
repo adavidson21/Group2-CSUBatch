@@ -71,15 +71,16 @@ public class QueueManager {
   public int getQueueSize() {
     return jobQueue.size();
   }
-  public void listQueue(){
-    if (jobQueue.isEmpty() != true){
+
+  public void listQueue() {
+    if (!jobQueue.isEmpty()) {
       int i = 1;
-      for(Job currJob : jobQueue){
-        System.out.println(i + ". " + currJob.getName() + " " + currJob.getExecutionTimeMs() + "Ms " + currJob.getExecutionPriority() + " " + currJob.getArrivalTime());
+      for (Job currJob : jobQueue) {
+        long formattedSeconds = currJob.getExecutionTime() / 1000;
+        System.out.println(i + ". " + currJob.getName() + " " + formattedSeconds + " seconds " + currJob.getExecutionPriority() + " " + currJob.getArrivalTime());
         i++;
       }
-    }
-    else{
+    } else {
       System.out.println("Queue Currently Empty.");
     }
   }
