@@ -5,22 +5,22 @@ import java.time.LocalDateTime;
 public class Job {
     private final String name;
     private final int executionPriority;
-    private final long executionTimeMs;
+    private final long executionTime;
     private boolean isCompleted = false;
     private final LocalDateTime arrival;
 
-    public Job(String name, long executionTimeMs) {
+    public Job(String name, long executionTime) {
         /* Sets the execution priority to 1 (highest priority) by default.
         In the case where priority is not specified or "Priority" scheduling policy is not used,
         this ensures that the priority value does not affect whatever scheduling policy is used.
         */
-        this(name, 1, executionTimeMs, null);
+        this(name, 1, executionTime, null);
     }
 
-    public Job(String name, int executionPriority, long executionTimeMs, LocalDateTime date) {
+    public Job(String name, int executionPriority, long executionTime, LocalDateTime date) {
         this.name = name;
         this.executionPriority = executionPriority;
-        this.executionTimeMs = executionTimeMs;
+        this.executionTime = executionTime;
         this.arrival = date;
     }
     public LocalDateTime getArrivalTime(){
@@ -34,8 +34,8 @@ public class Job {
         return this.executionPriority;
     }
 
-    public long getExecutionTimeMs() {
-        return this.executionTimeMs;
+    public long getExecutionTime() {
+        return this.executionTime;
     }
 
     public boolean getIsCompleted() {
