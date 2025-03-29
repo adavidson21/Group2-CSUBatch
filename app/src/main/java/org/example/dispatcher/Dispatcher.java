@@ -1,10 +1,10 @@
 package org.example.dispatcher;
 
-import org.example.common.Job;
-import org.example.queueManager.QueueManager;
-import org.example.fileLogger.FileLogger;
-
 import java.util.logging.Logger;
+
+import org.example.common.Job;
+import org.example.fileLogger.FileLogger;
+import org.example.queueManager.QueueManager;
 
 /**
  * The Dispatcher governs a thread that executes submitted jobs.
@@ -73,7 +73,6 @@ public class Dispatcher implements Runnable {
                 Thread.currentThread().interrupt();
                 System.out.println("Dispatcher: thread interrupted. Exiting process.");
                 isRunning = false;
-                e.printStackTrace();
             }
         }
     }

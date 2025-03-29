@@ -1,16 +1,15 @@
 package org.example.e2e;
 
 import org.example.CSUBatchTestBase;
-import org.junit.jupiter.api.DisplayName;
-import org.junit.jupiter.api.Test;
-
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Test;
 
 public class CSUBatchEndToEndTest extends CSUBatchTestBase {
     @Test
     @DisplayName("Successfully completes a full end to end flow of UI interactions.")
-    public void E2E_UIControllerFlow() {
+    public void E2E_UIControllerFlow() throws InterruptedException {
         // Arrange
         setUserInput(
                 "run fishing 1 10\n" +  // valid run

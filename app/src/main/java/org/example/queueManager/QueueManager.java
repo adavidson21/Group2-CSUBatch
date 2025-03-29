@@ -84,5 +84,11 @@ public class QueueManager {
       System.out.println("Queue Currently Empty.");
     }
   }
+  public void empty(){
+    jobQueue.clear();
+  }
+  public boolean checkForJob(Job job){
+    return jobQueue.contains(job);
+  }
 
 }

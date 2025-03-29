@@ -3,19 +3,16 @@
  */
 package org.example;
 
-import org.example.common.Job;
-import org.example.dispatcher.Dispatcher;
-import org.example.queueManager.QueueManager;
-import org.example.uiController.UIController;
-
 import java.util.Scanner;
+
+import org.example.uiController.UIController;
 
 public class CSUBatchApplication {
     public String getGreeting() {
         return "System Loading...";
     }
 
-    public static void main(String[] args) {
+    public static void main(String[] args) throws InterruptedException {
         System.out.println(new CSUBatchApplication().getGreeting());
          UIController UI = new UIController(new Scanner(System.in));
          UI.generateUI();
