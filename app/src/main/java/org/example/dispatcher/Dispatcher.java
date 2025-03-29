@@ -1,17 +1,17 @@
 package org.example.dispatcher;
 
 import org.example.common.Job;
-import java.util.concurrent.BlockingQueue;
+import org.example.queueManager.QueueManager;
 
 /**
  * Dispatcher receives jobs from the Scheduler's scheduled job queue and executes them.
  */
 public class Dispatcher implements Runnable {
-    private final BlockingQueue<Job> scheduledJobs;
+    private final QueueManager queueManager;
     private volatile boolean isRunning = true;
 
-    public Dispatcher(BlockingQueue<Job> scheduledJobs) {
-        this.scheduledJobs = scheduledJobs;
+    public Dispatcher(QueueManager queueManager) {
+        this.queueManager = queueManager;
     }
 
     void executeJob(Job job) {
@@ -31,12 +31,17 @@ public class Dispatcher implements Runnable {
     public void run() {
         while (isRunning) {
             try {
-                Job job = scheduledJobs.take(); // Block until a job is available
-                executeJob(job);
+                Job job = queueManager.dequeueScheduledJob();
+                if (job != null) {
+                    executeJob(job);
+                }
             } catch (InterruptedException e) {
                 Thread.currentThread().interrupt();
-                System.out.println("Dispatcher interrupted.");
             }
         }
+    }
+
+    public void stop() {
+        isRunning = false;
     }
 }

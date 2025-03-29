@@ -6,10 +6,10 @@ import org.example.queueManager.QueueManager;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
-import java.util.List;
 import java.util.ArrayList;
+import java.util.List;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 class SchedulerTest {
     private Scheduler fcfsScheduler;
@@ -35,17 +35,17 @@ class SchedulerTest {
 
         fcfsQueue = new QueueManager();
         fcfsScheduler = new Scheduler(SchedulingPolicy.FCFS, fcfsQueue);
-        fcfsDispatcher = new Dispatcher(fcfsScheduler.getScheduledJobQueue());
+        fcfsDispatcher = new Dispatcher(fcfsQueue);
         new Thread(fcfsDispatcher).start();
 
         sjfQueue = new QueueManager();
         sjfScheduler = new Scheduler(SchedulingPolicy.SJF, sjfQueue);
-        sjfDispatcher = new Dispatcher(sjfScheduler.getScheduledJobQueue());
+        sjfDispatcher = new Dispatcher(sjfQueue);
         new Thread(sjfDispatcher).start();
 
         priorityQueue = new QueueManager();
         priorityScheduler = new Scheduler(SchedulingPolicy.Priority, priorityQueue);
-        priorityDispatcher = new Dispatcher(priorityScheduler.getScheduledJobQueue());
+        priorityDispatcher = new Dispatcher(priorityQueue);
         new Thread(priorityDispatcher).start();
     }
 
@@ -70,9 +70,9 @@ class SchedulerTest {
 
         Thread.sleep(6000);
 
+        assertTrue(jobs.get(0).getIsCompleted());
         assertTrue(jobs.get(1).getIsCompleted());
         assertTrue(jobs.get(2).getIsCompleted());
-        assertTrue(jobs.get(0).getIsCompleted());
     }
 
     @Test
@@ -84,7 +84,7 @@ class SchedulerTest {
         Thread.sleep(6000);
 
         assertTrue(jobs.get(0).getIsCompleted());
-        assertTrue(jobs.get(2).getIsCompleted());
         assertTrue(jobs.get(1).getIsCompleted());
+        assertTrue(jobs.get(2).getIsCompleted());
     }
 }
