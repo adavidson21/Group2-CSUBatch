@@ -42,7 +42,7 @@ public class UIController {
         System.out.println("Welcome to the CSUBatch Scheduling Application");
         System.out.println("Thank you for downloading.");
         System.out.println("This System is meant to act as a scheduling application where jobs can be added to a queue that will be arranged based \n on the selected priority.");
-        System.out.println("Commands: run, list, policy_change, help, exit");
+        System.out.println("Commands: run, list, policy_change, batch_job, help, exit");
     }
 
 
@@ -59,6 +59,9 @@ public class UIController {
                 System.out.println("System ending...");
                 break;
             }
+            if (!command.equals(Command.BATCH_JOB)) {
+                dispatcher.setIsBatchMode(false);
+            }
 
             switch(command){
                 case RUN:
@@ -73,12 +76,15 @@ public class UIController {
                 case HELP:
                     handleHelpCommand();
                     break;
+                case BATCH_JOB:
+                    handleBatchJobCommand(commandArr);
+                    break;
                 default:
                     System.out.println("Sorry, the entered command is not recognized. Please try again or type 'help' for a list of commands.");
                     break;
             }
 
-            System.out.println("\nPlease Enter Command:");
+            System.out.println("\nPlease Enter a Command:");
             commandLine = userInput.nextLine();
             commandArr = commandLine.split(" ");
             if (commandArr.length == 0) {
@@ -103,12 +109,12 @@ public class UIController {
         }
         try {
             String jobName = command[1];
-            int jobTime = Integer.parseInt(command[2]);
+            int jobTime = Integer.parseInt(command[2]) * 1000; // Convert user input from seconds to milliseconds
             int jobPriority = Integer.parseInt(command[3]);
             LocalDateTime currentDate = LocalDateTime.now();
             Job userSubmittedJob = new Job(jobName, jobPriority, jobTime, currentDate);
 
-            jobQueue.enqueueJob(userSubmittedJob);
+            this.jobQueue.enqueueJob(userSubmittedJob);
             System.out.println("Job '" + jobName + "' added to the queue.");
             if (dispatcherThread == null) {
                 dispatcherThread = this.startThread("Dispatcher", dispatcher);
@@ -149,10 +155,32 @@ public class UIController {
      */
     private void handleHelpCommand(){
         System.out.println("Available Commands:");
-        System.out.println("run <job name> <job time> <priority> - Will add a job to the system");
+        System.out.println("run <job name> <job time in seconds> <priority> - Will add a job to the system");
         System.out.println("list - Print out the current job queue.");
         System.out.println("policy_change <policy> - will change the policy to the new entered one and restructure queue.");
         System.out.println("exit - End System processes and perform benchmark on close");
+    }
+
+    /**
+     * Handles the batch_job micro benchmarks command when it is submitted by the user.
+     */
+    private void handleBatchJobCommand(String[] command) {
+        if (!this.dispatcher.getIsBatchMode()) {
+            System.out.println("\nEntering batch_job mode. Please see micro_benchmarks.log file for results.");
+        }
+        if (command.length != 2) {
+            System.out.println("Invalid batch_job command please try again");
+        }
+        Job batchJob = new Job(command[0], 1, Integer.parseInt(command[1]), LocalDateTime.now());
+        dispatcher.setIsBatchMode(true);
+        try {
+            this.jobQueue.enqueueJob(batchJob);
+        } catch (InterruptedException e) {
+            System.out.println("Error: Could not enqueue batch job: " + e.getMessage());
+        }
+        if (dispatcherThread == null) {
+            dispatcherThread = this.startThread("Dispatcher", dispatcher);
+        }
     }
 
     /**
@@ -164,7 +192,6 @@ public class UIController {
     Thread startThread(String className, Runnable runnable) {
         Thread thread = new Thread(runnable);
         thread.start();
-        System.out.printf("%s: Started thread. %n", className);
         return thread;
     }
 

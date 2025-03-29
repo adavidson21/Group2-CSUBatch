@@ -9,5 +9,6 @@ public enum Command {
     POLICY_CHANGE,
     HELP,
     EXIT,
-    UNKNOWN
+    UNKNOWN,
+    BATCH_JOB
 }
