@@ -42,20 +42,13 @@ public class Dispatcher implements Runnable {
         fileLogger.info(String.format("Job %s | Status: Started %n", job.getName()));
         this.simulateJobDuration(job);
         // write job completion to a file
-        fileLogger.info(String.format("Job %s | Status: Completed | Execution Duration: %dms seconds. %n", job.getName(), job.getExecutionTime() * 1000));
+        fileLogger.info(String.format("Job %s | Status: Completed | Execution Duration: %d seconds. %n", job.getName(), job.getExecutionTime() / 1000));
     }
 
     void executeJob(Job job) {
         System.out.printf("Dispatcher: executing job: %s.%n", job.getName());
-        try {
-            Thread.sleep(job.getExecutionTime());
-        } catch(InterruptedException e) {
-            Thread.currentThread().interrupt();
-        }
-        // mark job as completed
-        job.setIsCompleted(true);
+        this.simulateJobDuration(job);
         System.out.printf("Dispatcher: Job: %s has completed in %d seconds. %n", job.getName(), job.getExecutionTime() / 1000);
-
     }
 
     @Override

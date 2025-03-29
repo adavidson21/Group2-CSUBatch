@@ -171,7 +171,8 @@ public class UIController {
         if (command.length != 2) {
             System.out.println("Invalid batch_job command please try again");
         }
-        Job batchJob = new Job(command[0], 1, Integer.parseInt(command[1]), LocalDateTime.now());
+        long jobExecutionTime = Long.parseLong(command[1]) * 1000; // Convert user input from seconds to milliseconds
+        Job batchJob = new Job(command[0], 1, jobExecutionTime, LocalDateTime.now());
         dispatcher.setIsBatchMode(true);
         try {
             this.jobQueue.enqueueJob(batchJob);
