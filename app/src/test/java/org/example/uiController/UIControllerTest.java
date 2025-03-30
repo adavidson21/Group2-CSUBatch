@@ -1,10 +1,9 @@
 package org.example.uiController;
 
 import org.example.CSUBatchTestBase;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-
-import static org.junit.jupiter.api.Assertions.assertTrue;
 
 /**
  * Unit tests for the UIController class.
@@ -26,7 +25,7 @@ public class UIControllerTest extends CSUBatchTestBase {
 
     @Test
     @DisplayName("Should successfully add the job to the queue when a valid 'run' command is entered.")
-    public void Commands_ValidRun_ShouldAddJobToQueue() {
+    public void Commands_ValidRun_ShouldAddJobToQueue() throws InterruptedException {
         // Arrange
         String jobName = "test-job";
         setUserInput("run " + jobName + " 100 10\nexit\n");
@@ -40,7 +39,7 @@ public class UIControllerTest extends CSUBatchTestBase {
 
     @Test
     @DisplayName("Should display an error message when an invalid 'run' command (wrong format) is entered.")
-    public void Commands_InvalidRun_ShouldNotAddJobToQueue() {
+    public void Commands_InvalidRun_ShouldNotAddJobToQueue() throws InterruptedException {
         // Arrange
         setUserInput("run fish hello ten\nexit\n");
 
@@ -53,7 +52,7 @@ public class UIControllerTest extends CSUBatchTestBase {
 
     @Test
     @DisplayName("Should successfully display an empty message when the 'list' command is entered without jobs queued.")
-    public void Commands_ValidList_ShouldDisplayEmptyQueue() {
+    public void Commands_ValidList_ShouldDisplayEmptyQueue() throws InterruptedException {
         // Arrange
         setUserInput("list\nexit\n");
 
@@ -69,7 +68,7 @@ public class UIControllerTest extends CSUBatchTestBase {
 
     @Test
     @DisplayName("Should successfully list the job queue when the 'list' command is entered with jobs queued.")
-    public void Commands_ValidList_ShouldDisplayQueuedJobs() {
+    public void Commands_ValidList_ShouldDisplayQueuedJobs() throws InterruptedException {
         // Arrange
         setUserInput("run jobname 100 10\nlist\nexit\n");
 
@@ -85,7 +84,7 @@ public class UIControllerTest extends CSUBatchTestBase {
 
     @Test
     @DisplayName("Should successfully display the 'help' options when the 'help' command is entered.")
-    public void Commands_ValidHelp_ShouldDisplayHelpOptions() {
+    public void Commands_ValidHelp_ShouldDisplayHelpOptions() throws InterruptedException {
         // Arrange
         setUserInput("help\nexit\n");
 
@@ -100,7 +99,7 @@ public class UIControllerTest extends CSUBatchTestBase {
 
     @Test
     @DisplayName("Should successfully display the policy change Test 'policy_change' command")
-    public void Commands_ValidPolicyChange_ShouldSuccessfullyChangePolicy() {
+    public void Commands_ValidPolicyChange_ShouldSuccessfullyChangePolicy() throws InterruptedException {
         // Arrange
         setUserInput("policy_change fcfs\nexit\n");
 
@@ -113,7 +112,7 @@ public class UIControllerTest extends CSUBatchTestBase {
 
     @Test
     @DisplayName("Should display an error message when the input is not a valid command")
-    public void Command_InvalidInput_ShouldDisplayErrorMessage() {
+    public void Command_InvalidInput_ShouldDisplayErrorMessage() throws InterruptedException {
         // Arrange
         String command = "invalid";
         setUserInput(command + "\nexit\n");

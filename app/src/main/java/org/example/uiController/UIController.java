@@ -19,6 +19,7 @@ public class UIController {
     private final Scheduler scheduler;
     private final Dispatcher dispatcher;
     private Thread dispatcherThread;
+    private Thread schedulerThread;
 
     /**
      * The UIController constructor.
@@ -30,7 +31,7 @@ public class UIController {
     public UIController(Scanner scanner) {
         this.userInput = scanner;
         this.jobQueue = new QueueManager();
-        this.scheduler = new Scheduler(SchedulingPolicy.FCFS);
+        this.scheduler = new Scheduler(SchedulingPolicy.FCFS, jobQueue);
         this.dispatcher = new Dispatcher(jobQueue);
     }
 
@@ -48,8 +49,9 @@ public class UIController {
 
     /**
      * User interaction handler that parses commands as they are inputted by the user.
+     * @throws InterruptedException 
      */
-    public void userInteraction(){
+    public void userInteraction() throws InterruptedException{
         System.out.println("Please Enter a Command:");
         String commandLine = userInput.nextLine();
         String[] commandArr = commandLine.split(" "); //an array in place so the commands that are more than one word can be parsed.
@@ -94,6 +96,7 @@ public class UIController {
         System.out.println("System ending...");
         // cleanup loose threads
         this.endThread("Dispatcher", dispatcherThread);
+        this.endThread("Scheduler", schedulerThread);
     }
 
     /**
@@ -114,7 +117,11 @@ public class UIController {
             LocalDateTime currentDate = LocalDateTime.now();
             Job userSubmittedJob = new Job(jobName, jobPriority, jobTime, currentDate);
 
-            this.jobQueue.enqueueJob(userSubmittedJob);
+            if (schedulerThread == null){
+                schedulerThread = this.startThread("Scheduler", scheduler);
+            }
+
+            this.scheduler.addJob(userSubmittedJob);
             System.out.println("Job '" + jobName + "' added to the queue.");
             if (dispatcherThread == null) {
                 dispatcherThread = this.startThread("Dispatcher", dispatcher);
@@ -139,14 +146,30 @@ public class UIController {
     /**
      * Handles the policy_change command when it is submitted by the user.
      * @param command The commands.
+     * @throws InterruptedException 
      */
-    private void handlePolicyChangeCommand(String[] command){
+    private void handlePolicyChangeCommand(String[] command) throws InterruptedException{
         if(command.length != 2){
             System.out.println("Invalid policy_change command, please try again. \nUsage: policy_change <policy>");
         }
         else{
-            //TODO: Add policy change functionality here.
-            System.out.println("policy change successful");
+            switch (command[1]) {
+                case "FCFS":
+                    scheduler.setPolicy(SchedulingPolicy.FCFS);
+                    System.out.println("policy change successful");
+                    break;
+                case "SJF":
+                    scheduler.setPolicy(SchedulingPolicy.SJF);
+                    System.out.println("policy change successful");
+                    break;
+                case "Priority":
+                    scheduler.setPolicy(SchedulingPolicy.Priority);
+                    System.out.println("policy change successful");
+                    break;
+                default:
+                    System.out.println("Invalid policy Entered");
+                    break;
+            }
         }
     }
 
@@ -211,7 +234,6 @@ public class UIController {
             }
         } catch (InterruptedException e) {
             Thread.currentThread().interrupt();
-            e.printStackTrace();
         }
     }
 }
