@@ -1,88 +1,100 @@
 package org.example.scheduler;
 
 import org.example.common.Job;
+import org.example.queueManager.QueueManager;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-import static org.junit.jupiter.api.Assertions.*;
-import java.util.List;
-import java.util.ArrayList;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.EnumSource;
 
-class SchedulerTest {
-    private Scheduler fcfsScheduler;
-    private Scheduler sjfScheduler;
-    private Scheduler priorityScheduler;
-    private List<Job> jobs;
+import static org.junit.jupiter.api.Assertions.*;
+
+/**
+ * Test class for the Scheduler class.
+ */
+public class SchedulerTest {
+    private QueueManager queueManager;
+    private Scheduler scheduler;
 
     @BeforeEach
-    void setUp() {
-        jobs = new ArrayList<>();
-        jobs.add(new Job("Job-1", 3, 2000, null));  // Execution time 2000ms, Priority 3
-        jobs.add(new Job("Job-2", 1, 1000,null));  // Execution time 1000ms, Priority 1
-        jobs.add(new Job("Job-3", 2, 1500,null));  // Execution time 1500ms, Priority 2
-
-        fcfsScheduler = new Scheduler(SchedulingPolicy.FCFS);
-        sjfScheduler = new Scheduler(SchedulingPolicy.SJF);
-        priorityScheduler = new Scheduler(SchedulingPolicy.Priority);
+    void setup() {
+        queueManager = new QueueManager();
+        scheduler = new Scheduler(SchedulingPolicy.FCFS, queueManager); // default to FCFS
     }
 
     @Test
-    void testFCFSScheduling() throws InterruptedException {
-        for (Job job : jobs) {
-            fcfsScheduler.addJob(job);
-        }
+    @DisplayName("Should add a single Job to the scheduler.")
+    void Scheduler_AddSingleJob_ShouldAddJob() throws InterruptedException {
+        // Arrange
+        Job job = new Job("TestJob", 1, 2000L, null);
 
-        Thread.sleep(6000); // Allow time for execution
+        // Act
+        scheduler.addJob(job);
 
-        assertTrue(jobs.get(0).getIsCompleted(), "First job should be completed");
-        assertTrue(jobs.get(1).getIsCompleted(), "Second job should be completed");
-        assertTrue(jobs.get(2).getIsCompleted(), "Third job should be completed");
-
-        fcfsScheduler.stopScheduler();
+        // Assert
+        assertTrue(queueManager.checkForJob(job));
     }
 
     @Test
-    void testSJFScheduling() throws InterruptedException {
-        for (Job job : jobs) {
-            sjfScheduler.addJob(job);
-        }
+    @DisplayName("Should follow new policy when changed to SJF.")
+    void Scheduler_ChangePolicy_ShouldFollowSJFOnChange() throws InterruptedException {
+        // Arrange
+        Job jobFast = new Job("FastJob", 1, 1000L, null);    // shortest time
+        Job jobMedium = new Job("MediumJob", 1, 3000L, null);
+        Job jobSlow = new Job("SlowJob", 1, 5000L, null);
 
-        Thread.sleep(6000); // Allow time for execution
+        scheduler.addJob(jobSlow);
+        scheduler.addJob(jobMedium);
+        scheduler.addJob(jobFast);
 
-        // Jobs should complete in order of shortest execution time first
-        assertTrue(jobs.get(1).getIsCompleted(), "Shortest job should be completed first");
-        assertTrue(jobs.get(2).getIsCompleted(), "Second shortest job should be completed next");
-        assertTrue(jobs.get(0).getIsCompleted(), "Longest job should be completed last");
+        scheduler.setPolicy(SchedulingPolicy.SJF);
 
-        sjfScheduler.stopScheduler();
+        // Act
+        Job firstOut = queueManager.dequeueJob();
+        Job secondOut = queueManager.dequeueJob();
+        Job thirdOut = queueManager.dequeueJob();
+
+        // Assert
+        assertEquals("FastJob", firstOut.getName());
+        assertEquals("MediumJob", secondOut.getName());
+        assertEquals("SlowJob", thirdOut.getName());
     }
 
     @Test
-    void testPriorityScheduling() throws InterruptedException {
-        for (Job job : jobs) {
-            priorityScheduler.addJob(job);
-        }
+    @DisplayName("Should follow new policy when changed to Priority.")
+    void Scheduler_ChangePolicy_ShouldFollowPriorityOnChange() throws InterruptedException {
+        // Create and add Jobs with distinct priorities
+        Job jobHighPriority = new Job("HighPriorityJob", 1, 2000L, null);
+        Job jobMediumPriority = new Job("MediumPriorityJob", 2, 2000L, null);
+        Job jobLowPriority = new Job("LowPriorityJob", 3, 2000L, null);
 
-        Thread.sleep(6000); // Allow time for execution
+        scheduler.addJob(jobLowPriority);
+        scheduler.addJob(jobMediumPriority);
+        scheduler.addJob(jobHighPriority);
 
-        // Jobs should complete in order of highest priority first
-        assertTrue(jobs.get(0).getIsCompleted(), "Highest priority job should be completed first");
-        assertTrue(jobs.get(2).getIsCompleted(), "Second highest priority job should be completed next");
-        assertTrue(jobs.get(1).getIsCompleted(), "Lowest priority job should be completed last");
+        // Change policy to Priority
+        scheduler.setPolicy(SchedulingPolicy.Priority);
 
-        priorityScheduler.stopScheduler();
+        // Act
+        Job firstOut = queueManager.dequeueJob();
+        Job secondOut = queueManager.dequeueJob();
+        Job thirdOut = queueManager.dequeueJob();
+
+        // Assert
+        assertEquals("HighPriorityJob", firstOut.getName());
+        assertEquals("MediumPriorityJob", secondOut.getName());
+        assertEquals("LowPriorityJob", thirdOut.getName());
     }
 
-    @Test
-    void testThreadSafeJobAddition() {
-        assertDoesNotThrow(() -> {
-            Thread thread1 = new Thread(() -> fcfsScheduler.addJob(new Job("Job-4", 1, 500,null)));
-            Thread thread2 = new Thread(() -> fcfsScheduler.addJob(new Job("Job-5", 2, 700,null)));
+    @ParameterizedTest
+    @EnumSource(SchedulingPolicy.class)
+    @DisplayName("Should reflect policy change for the chosen policy")
+    void Scheduler_ChangePolicy_ShouldReflectChange(SchedulingPolicy newPolicy) throws InterruptedException {
+        // Arrange / Act
+        scheduler.setPolicy(newPolicy);
 
-            thread1.start();
-            thread2.start();
-
-            thread1.join();
-            thread2.join();
-        }, "Job addition should be thread-safe");
+        // Assert
+        assertEquals(newPolicy, scheduler.getPolicy());
     }
 }

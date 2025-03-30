@@ -49,6 +49,6 @@ public class CSUBatchTestBase {
     protected void setUserInput(String input) {
         InputStream inputStream = new ByteArrayInputStream(input.getBytes());
         Scanner mockScanner = new Scanner(inputStream);
-        UI = new UIController(mockScanner);
+        UI = new UIController(mockScanner, false);
     }
 }

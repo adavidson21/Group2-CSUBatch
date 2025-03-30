@@ -20,6 +20,7 @@ public class UIController {
     private final Dispatcher dispatcher;
     private Thread dispatcherThread;
     private Thread schedulerThread;
+    private boolean enableDispatcher = true; // enable by default
 
     /**
      * The UIController constructor.
@@ -27,12 +28,26 @@ public class UIController {
      * and to allow for dependency injection for testing if needed.
      * @param scanner The scanner.
      */
-
     public UIController(Scanner scanner) {
         this.userInput = scanner;
         this.jobQueue = new QueueManager();
         this.scheduler = new Scheduler(SchedulingPolicy.FCFS, jobQueue);
         this.dispatcher = new Dispatcher(jobQueue);
+    }
+
+    /**
+     * The UIController constructor with option to disable dispatcher.
+     * Initializes the QueueManager, Scheduler, and Dispatcher to encapsulate dependencies
+     * and to allow for dependency injection for testing if needed.
+     * @param scanner The scanner.
+     * @param enableDispatcher The dispatcher toggle.
+     */
+    public UIController(Scanner scanner, boolean enableDispatcher) {
+        this.userInput = scanner;
+        this.jobQueue = new QueueManager();
+        this.scheduler = new Scheduler(SchedulingPolicy.FCFS, jobQueue);
+        this.dispatcher = new Dispatcher(jobQueue);
+        this.enableDispatcher = enableDispatcher;
     }
 
     /**
@@ -49,7 +64,7 @@ public class UIController {
 
     /**
      * User interaction handler that parses commands as they are inputted by the user.
-     * @throws InterruptedException 
+     * @throws InterruptedException Throws interrupted exception
      */
     public void userInteraction() throws InterruptedException{
         System.out.println("Please Enter a Command:");
@@ -123,7 +138,7 @@ public class UIController {
 
             this.scheduler.addJob(userSubmittedJob);
             System.out.println("Job '" + jobName + "' added to the queue.");
-            if (dispatcherThread == null) {
+            if (enableDispatcher && dispatcherThread == null) {
                 dispatcherThread = this.startThread("Dispatcher", dispatcher);
             }
         } catch (NumberFormatException e) {
@@ -153,7 +168,7 @@ public class UIController {
             System.out.println("Invalid policy_change command, please try again. \nUsage: policy_change <policy>");
         }
         else{
-            switch (command[1]) {
+            switch (command[1].toUpperCase()) {
                 case "FCFS":
                     scheduler.setPolicy(SchedulingPolicy.FCFS);
                     System.out.println("policy change successful");
@@ -162,7 +177,7 @@ public class UIController {
                     scheduler.setPolicy(SchedulingPolicy.SJF);
                     System.out.println("policy change successful");
                     break;
-                case "Priority":
+                case "PRIORITY":
                     scheduler.setPolicy(SchedulingPolicy.Priority);
                     System.out.println("policy change successful");
                     break;

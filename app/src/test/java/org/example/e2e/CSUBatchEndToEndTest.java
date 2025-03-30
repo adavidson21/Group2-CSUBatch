@@ -28,7 +28,7 @@ public class CSUBatchEndToEndTest extends CSUBatchTestBase {
 
         // Assert
         assertTrue(output.contains("Job 'fishing' added to the queue"));    // "run fishing 100 10\n"
-//        assertTrue(output.contains("fishing 1 seconds 10"));                      // "list\n"
+        assertTrue(output.contains("fishing 1 seconds 10"));                // "list\n"
         assertTrue(output.contains("Available Commands:"));                 // "help\n"
         assertTrue(output.contains("policy change successful"));            // "policy_change fcfs\n"
 
@@ -37,5 +37,52 @@ public class CSUBatchEndToEndTest extends CSUBatchTestBase {
 
         assertTrue(output.contains("not recognized"));                      // "invalid input\n"
         assertTrue(output.contains("System ending..."));                    // "exit\n"
+    }
+
+    @Test
+    @DisplayName("Successfully completes a full end to end flow of scheduling actions to verify policy changes and queue order.")
+    public void E2E_SchedulerFlow() throws InterruptedException {
+        setUserInput(
+                "run jobA 3 1\n" +                  // valid run (CPU=3s, Priority=1)
+                        "run jobB 1 5\n" +          // valid run (CPU=1s, Priority=5)
+                        "list\n" +                  // valid list
+                        "policy_change sjf\n" +     // switch to Shortest Job First
+                        "list\n" +                  // valid list
+                        "policy_change Priority\n" + // switch to Priority
+                        "list\n" +                  // valid list
+                        "exit\n"
+        );
+
+        // Act
+        UI.userInteraction();
+        String output = getOutput();
+
+        // Assert
+        assertTrue(output.contains("Job 'jobA' added to the queue"));
+        assertTrue(output.contains("Job 'jobB' added to the queue"));
+
+        int sjfPolicyIndex = output.indexOf("Scheduling Policy: SJF");
+        assertTrue(sjfPolicyIndex >= 0); // Validate change to SJF
+
+        String afterSJFOutput = output.substring(sjfPolicyIndex);
+        int jobBPosSJF = afterSJFOutput.indexOf("jobB");
+        int jobAPosSJF = afterSJFOutput.indexOf("jobA");
+        assertTrue(jobBPosSJF >= 0);
+        assertTrue(jobAPosSJF >= 0);
+        assertTrue(jobBPosSJF < jobAPosSJF); // Validate jobB comes before jobA
+
+        int priorityPolicyIndex = output.indexOf("Scheduling Policy: Priority");
+        assertTrue(priorityPolicyIndex >= 0); // Validate change to priority
+
+        String afterPriorityOutput = output.substring(priorityPolicyIndex);
+
+        int jobAPosPriority = afterPriorityOutput.indexOf("jobA");
+        int jobBPosPriority = afterPriorityOutput.indexOf("jobB");
+
+        assertTrue(jobAPosPriority >= 0);
+        assertTrue(jobBPosPriority >= 0);
+        assertTrue(jobAPosPriority < jobBPosPriority); // Validate jobA comes before jobB
+
+        assertTrue(output.contains("System ending..."));
     }
 }
