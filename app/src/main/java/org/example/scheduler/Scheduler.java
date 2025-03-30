@@ -35,6 +35,13 @@ public class Scheduler implements Runnable{
         try {
             originalList.add(job);
             jobQueue.enqueueJob(job);
+            switch(policy){
+                case FCFS -> manageFCFS();
+                case Priority -> managePriority();
+                case SJF -> manageSJF();
+                default -> {
+                }
+            }
             condition.signal(); // Notify scheduler that a job is available
         } finally {
             lock.unlock();
