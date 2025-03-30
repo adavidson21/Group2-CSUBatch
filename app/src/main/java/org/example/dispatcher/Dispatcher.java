@@ -15,6 +15,7 @@ public class Dispatcher implements Runnable {
 
     private volatile boolean isRunning = true;
     private boolean isBatchMode = false;
+    private boolean isPerfMode = false;
 
     public Dispatcher(QueueManager queueManager) {
         this.queueManager = queueManager;
@@ -26,6 +27,14 @@ public class Dispatcher implements Runnable {
 
     public boolean getIsBatchMode() {
         return this.isBatchMode;
+    }
+
+    public void setIsPerfMode(boolean isPerfMode) {
+        this.isPerfMode = isPerfMode;
+    }
+
+    public boolean getIsPerfMode() {
+        return this.isPerfMode;
     }
 
     void simulateJobDuration(Job job) {
@@ -55,7 +64,8 @@ public class Dispatcher implements Runnable {
     public void run() {
         while(isRunning){
             try {
-                if (!isBatchMode) {
+                if (!isBatchMode && !isPerfMode) {
+                    // only display under normal run circumstances
                     System.out.printf("Dispatcher: current queue size: %s. %n", this.queueManager.getQueueSize());
                 }
                 // pull jobs from the queue and execute them
