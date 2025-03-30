@@ -16,8 +16,8 @@ import org.example.queueManager.QueueManager;
  */
 public class Scheduler implements Runnable{
     private final QueueManager jobQueue;
-    private List<Job>  mutateList = new ArrayList<>();
-    private List<Job> originalList = new ArrayList<>();
+    private final List<Job> mutateList = new ArrayList<>();
+    private final List<Job> originalList = new ArrayList<>();
     private final Lock lock = new ReentrantLock();
     private final Condition condition = lock.newCondition();
     private SchedulingPolicy policy;
