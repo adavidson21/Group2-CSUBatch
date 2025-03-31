@@ -76,9 +76,6 @@ public class UIController {
                 System.out.println("System ending...");
                 break;
             }
-            if (!command.equals(Command.BATCH_JOB)) {
-                dispatcher.setIsBatchMode(false);
-            }
 
             switch(command){
                 case RUN:
@@ -203,22 +200,29 @@ public class UIController {
      * Handles the batch_job micro benchmarks command when it is submitted by the user.
      */
     void handleBatchJobCommand(String[] command) {
+        if (command.length != 2) {
+            System.out.println("Invalid batch_job command, please try again. "
+                    + "\nUsage: batch_job <execution_time_in_seconds>");
+            return;
+        }
+
         if (!this.dispatcher.getIsBatchMode()) {
             System.out.println("\nEntering batch_job mode. Please see micro_benchmarks.log file for results.");
+            dispatcher.setIsBatchMode(true);
         }
-        if (command.length != 2) {
-            System.out.println("Invalid batch_job command please try again");
-        }
-        long jobExecutionTime = Long.parseLong(command[1]) * 1000; // Convert user input from seconds to milliseconds
-        Job batchJob = new Job(command[0], 1, jobExecutionTime, LocalDateTime.now());
-        dispatcher.setIsBatchMode(true);
+
         try {
+            long jobExecutionTime = Long.parseLong(command[1]) * 1000;
+            Job batchJob = new Job(command[0], 1, jobExecutionTime, LocalDateTime.now());
             this.jobQueue.enqueueJob(batchJob);
+
+            if (dispatcherThread == null) {
+                dispatcherThread = this.startThread("Dispatcher", dispatcher);
+            }
+        } catch (NumberFormatException ex) {
+            System.out.println("Error: execution time must be an integer. Please try again.");
         } catch (InterruptedException e) {
             System.out.println("Error: Could not enqueue batch job: " + e.getMessage());
-        }
-        if (dispatcherThread == null) {
-            dispatcherThread = this.startThread("Dispatcher", dispatcher);
         }
     }
 
