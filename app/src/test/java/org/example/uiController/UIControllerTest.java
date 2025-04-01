@@ -126,7 +126,7 @@ public class UIControllerTest extends CSUBatchTestBase {
 
     @Test
     @DisplayName("Should enter batch mode when the 'batch_job' command is entered.")
-    public void Command_BatchMode_ShouldEngageBatchMode() {
+    public void Command_ValidBatchMode_ShouldEngageBatchMode() {
         // Arrange
         String[] command = {"batch_job", "5"};
         setUserInput("command\nexit\n");
@@ -136,5 +136,33 @@ public class UIControllerTest extends CSUBatchTestBase {
 
         // Assert
         assertTrue(getOutput().contains("Entering batch_job mode. Please see micro_benchmarks.log file for results."));
+    }
+
+    @Test
+    @DisplayName("Should display error message when 'batch_job' command is entered without parameters.")
+    public void Command_InvalidBatchMode_ShouldDisplayErrorMessage() {
+        // Arrange
+        String[] command = {"batch_job"};
+        setUserInput("command\nexit\n");
+
+        // Act
+        UI.handleBatchJobCommand(command);
+
+        // Assert
+        assertTrue(getOutput().contains("Invalid batch_job command, please try again."));
+    }
+
+    @Test
+    @DisplayName("Should display error message when 'batch_job' command is entered without numeric execution time.")
+    public void Command_BatchModeWithInvalidTime_ShouldDisplayErrorMessage() {
+        // Arrange
+        String[] command = {"batch_job", "foo"};
+        setUserInput("command\nexit\n");
+
+        // Act
+        UI.handleBatchJobCommand(command);
+
+        // Assert
+        assertTrue(getOutput().contains("Error: execution time must be an integer. Please try again."));
     }
 }
