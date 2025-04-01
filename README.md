@@ -25,3 +25,6 @@ To run the unit tests:
 ```
 ./gradlew clean test
 ```
+## Initial Architecture Diagrams
+[arch_diagrams.pdf](https://github.com/user-attachments/files/19558743/arch_diagrams.pdf)
+
