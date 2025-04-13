@@ -1,24 +1,37 @@
 package org.example.dispatcher;
 
+import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.concurrent.CountDownLatch;
 import java.util.logging.Logger;
 
 import org.example.common.Job;
 import org.example.fileLogger.FileLogger;
+import org.example.perfEvaluator.PerfEvaluator;
+import org.example.perfEvaluator.PerfMetrics;
 import org.example.queueManager.QueueManager;
+
 
 /**
  * The Dispatcher governs a thread that executes submitted jobs.
  */
 public class Dispatcher implements Runnable {
     private final QueueManager queueManager;
+    private final PerfEvaluator perfEvaluator;
     private static final Logger fileLogger = FileLogger.getLogger();
+    private CountDownLatch jobCompletionLatch;
 
     private volatile boolean isRunning = true;
     private boolean isBatchMode = false;
     private boolean isPerfMode = false;
 
-    public Dispatcher(QueueManager queueManager) {
+    public Dispatcher(QueueManager queueManager, PerfEvaluator perfEvaluator) {
         this.queueManager = queueManager;
+        this.perfEvaluator = perfEvaluator;
+    }
+
+    public void setCountdownLatch(CountDownLatch latch) {
+        this.jobCompletionLatch = latch;
     }
 
     public void setIsBatchMode(boolean isBatchMode) {
@@ -42,9 +55,18 @@ public class Dispatcher implements Runnable {
             Thread.sleep(job.getExecutionTime()); // user input is in seconds, convert to milliseconds
         } catch (InterruptedException e) {
             Thread.currentThread().interrupt();
+        } finally {
+            if (jobCompletionLatch != null) {
+                // this latch keeps track of the number of jobs that have completed
+                jobCompletionLatch.countDown();
+            }
+            // mark job itself as completed
+            job.setIsCompleted(true);
+            job.setActualCompletionTime(LocalDateTime.now());
+            // add to perfEvaluator for tracking
+            this.perfEvaluator.addCompletedJob(job);
         }
-        // mark job as completed
-        job.setIsCompleted(true);
+
     }
 
     void executeBatchJob(Job job) {

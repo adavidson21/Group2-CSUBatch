@@ -2,6 +2,7 @@ package org.example.uiController;
 
 import java.time.LocalDateTime;
 import java.util.Scanner;
+import java.util.concurrent.CountDownLatch;
 
 import org.example.common.Job;
 import org.example.dispatcher.Dispatcher;
@@ -20,6 +21,7 @@ public class UIController {
     private final QueueManager jobQueue;
     private final Scheduler scheduler;
     private final Dispatcher dispatcher;
+    private final PerfEvaluator perfEvaluator;
     private Thread dispatcherThread;
     private Thread schedulerThread;
     private boolean enableDispatcher = true; // enable by default
@@ -33,8 +35,9 @@ public class UIController {
     public UIController(Scanner scanner) {
         this.userInput = scanner;
         this.jobQueue = new QueueManager();
-        this.scheduler = new Scheduler(SchedulingPolicy.FCFS, jobQueue);
-        this.dispatcher = new Dispatcher(jobQueue);
+        this.scheduler = new Scheduler(SchedulingPolicy.FCFS, this.jobQueue);
+        this.perfEvaluator = new PerfEvaluator(this.scheduler);
+        this.dispatcher = new Dispatcher(this.jobQueue, this.perfEvaluator);
     }
 
     /**
@@ -47,8 +50,9 @@ public class UIController {
     public UIController(Scanner scanner, boolean enableDispatcher) {
         this.userInput = scanner;
         this.jobQueue = new QueueManager();
-        this.scheduler = new Scheduler(SchedulingPolicy.FCFS, jobQueue);
-        this.dispatcher = new Dispatcher(jobQueue);
+        this.scheduler = new Scheduler(SchedulingPolicy.FCFS, this.jobQueue);
+        this.perfEvaluator = new PerfEvaluator(this.scheduler);
+        this.dispatcher = new Dispatcher(this.jobQueue, this.perfEvaluator);
         this.enableDispatcher = enableDispatcher;
     }
 
@@ -134,8 +138,8 @@ public class UIController {
             String jobName = command[1];
             int jobTime = Integer.parseInt(command[2]) * 1000; // Convert user input from seconds to milliseconds
             int jobPriority = Integer.parseInt(command[3]);
-            LocalDateTime currentDate = LocalDateTime.now();
-            Job userSubmittedJob = new Job(jobName, jobPriority, jobTime, currentDate);
+            LocalDateTime currentDateTime = LocalDateTime.now();
+            Job userSubmittedJob = new Job(jobName, jobPriority, jobTime, currentDateTime);
 
             if (schedulerThread == null){
                 schedulerThread = this.startThread(scheduler);
@@ -249,27 +253,31 @@ public class UIController {
         int priorityLevels = Integer.parseInt(command[4]);
         int minCpuTime = Integer.parseInt(command[5]) * 1000; // convert to ms for processing
         int maxCpuTime = Integer.parseInt(command[6]) * 1000; // convert to ms for processing
+        // create a countdown latch to keep track of the number of jobs that have completed
+        CountDownLatch jobCompletionLatch = new CountDownLatch(numJobs);
+
         if (schedulerThread == null) {
             schedulerThread = this.startThread(scheduler);
         }
         if (dispatcherThread == null) {
             dispatcherThread = this.startThread(dispatcher);
         }
-        dispatcher.setIsPerfMode(true);
+        this.dispatcher.setIsPerfMode(true);
+        this.dispatcher.setCountdownLatch(jobCompletionLatch);
         PerfTestParams perfTestParams = new PerfTestParams(benchmarkName, policy, numJobs, priorityLevels, minCpuTime, maxCpuTime);
-        PerfEvaluator perfEvaluator = new PerfEvaluator(perfTestParams, scheduler, dispatcher);
         try {
-            perfEvaluator.run();
+            this.perfEvaluator.run(perfTestParams);
+            // wait for all jobs to complete before printing metrics
+            jobCompletionLatch.await();
+            this.perfEvaluator.printMetrics();
         } catch (InterruptedException e) {
             System.out.println("Error: Could not run performance evaluation: " + e.getMessage());
 
             if (dispatcherThread == null) {
-                dispatcherThread = this.startThread("Dispatcher", dispatcher);
+                dispatcherThread = this.startThread(dispatcher);
             }
         } catch (NumberFormatException ex) {
             System.out.println("Error: execution time must be an integer. Please try again.");
-        } catch (InterruptedException e) {
-            System.out.println("Error: Could not enqueue batch job: " + e.getMessage());
         }
     }
 

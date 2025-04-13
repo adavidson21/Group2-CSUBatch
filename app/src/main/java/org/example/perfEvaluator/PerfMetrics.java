@@ -4,21 +4,32 @@ package org.example.perfEvaluator;
  * The PerfMetrics class encapsulates the available performance metrics for a run of the PerfEvaluator.
  */
 public class PerfMetrics {
-    private final int averageResponseTime;
-    private final int throughput;
+    private long averageResponseTime;
+    private double throughput;
+    private long maxResponseTime;
 
-    public PerfMetrics(int averageResponseTime, int throughput) {
-        // average response time of the system after processing n jobs
+    public void setAverageResponseTime(long averageResponseTime) {
         this.averageResponseTime = averageResponseTime;
-        // throughput of the system after processing n jobs
+    }
+
+    public void setMaxResponseTime(long maxResponseTime) {
+        this.maxResponseTime = maxResponseTime;
+    }
+
+    public void setThroughput(double throughput) {
         this.throughput = throughput;
     }
 
-    public int getAverageResponseTime() {
+
+    public long getMaxResponseTime() {
+        return maxResponseTime;
+    }
+
+    public long getAverageResponseTime() {
         return averageResponseTime;
     }
 
-    public int getThroughput() {
+    public double getThroughput() {
         return throughput;
     }
 }

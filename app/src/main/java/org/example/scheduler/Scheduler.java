@@ -16,8 +16,8 @@ import org.example.queueManager.QueueManager;
  */
 public class Scheduler implements Runnable{
     private final QueueManager jobQueue;
-    private final List<Job> mutateList = new ArrayList<>();
-    private final List<Job> originalList = new ArrayList<>();
+    private final ArrayList<Job> mutateList = new ArrayList<>();
+    private final ArrayList<Job> originalList = new ArrayList<>();
     private final Lock lock = new ReentrantLock();
     private final Condition condition = lock.newCondition();
     private SchedulingPolicy policy;
@@ -100,7 +100,6 @@ public class Scheduler implements Runnable{
             }
 
         }
-
     }
     /**
      * Stops the scheduler gracefully.
