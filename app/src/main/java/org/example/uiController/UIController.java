@@ -2,9 +2,12 @@ package org.example.uiController;
 
 import java.time.LocalDateTime;
 import java.util.Scanner;
+import java.util.concurrent.CountDownLatch;
 
 import org.example.common.Job;
 import org.example.dispatcher.Dispatcher;
+import org.example.perfEvaluator.PerfEvaluator;
+import org.example.perfEvaluator.PerfTestParams;
 import org.example.queueManager.QueueManager;
 import org.example.scheduler.Scheduler;
 import org.example.scheduler.SchedulingPolicy;
@@ -18,6 +21,7 @@ public class UIController {
     private final QueueManager jobQueue;
     private final Scheduler scheduler;
     private final Dispatcher dispatcher;
+    private final PerfEvaluator perfEvaluator;
     private Thread dispatcherThread;
     private Thread schedulerThread;
     private boolean enableDispatcher = true; // enable by default
@@ -31,8 +35,9 @@ public class UIController {
     public UIController(Scanner scanner) {
         this.userInput = scanner;
         this.jobQueue = new QueueManager();
-        this.scheduler = new Scheduler(SchedulingPolicy.FCFS, jobQueue);
-        this.dispatcher = new Dispatcher(jobQueue);
+        this.scheduler = new Scheduler(SchedulingPolicy.FCFS, this.jobQueue);
+        this.perfEvaluator = new PerfEvaluator(this.scheduler);
+        this.dispatcher = new Dispatcher(this.jobQueue, this.perfEvaluator);
     }
 
     /**
@@ -45,8 +50,9 @@ public class UIController {
     public UIController(Scanner scanner, boolean enableDispatcher) {
         this.userInput = scanner;
         this.jobQueue = new QueueManager();
-        this.scheduler = new Scheduler(SchedulingPolicy.FCFS, jobQueue);
-        this.dispatcher = new Dispatcher(jobQueue);
+        this.scheduler = new Scheduler(SchedulingPolicy.FCFS, this.jobQueue);
+        this.perfEvaluator = new PerfEvaluator(this.scheduler);
+        this.dispatcher = new Dispatcher(this.jobQueue, this.perfEvaluator);
         this.enableDispatcher = enableDispatcher;
     }
 
@@ -58,7 +64,7 @@ public class UIController {
         System.out.println("Welcome to the CSUBatch Scheduling Application");
         System.out.println("Thank you for downloading.");
         System.out.println("This System is meant to act as a scheduling application where jobs can be added to a queue that will be arranged based \n on the selected priority.");
-        System.out.println("Commands: run, list, policy_change, batch_job, help, exit");
+        System.out.println("Commands: run, list, policy_change, batch_job, test, help, exit");
     }
 
 
@@ -76,22 +82,28 @@ public class UIController {
                 System.out.println("System ending...");
                 break;
             }
+            if (!command.equals(Command.BATCH_JOB)) {
+                dispatcher.setIsBatchMode(false);
+            }
 
             switch(command){
                 case RUN:
-                    handleRunCommand(commandArr);
+                    this.handleRunCommand(commandArr);
                     break;
                 case LIST:
-                    handleListCommand();
+                    this.handleListCommand();
                     break;
                 case POLICY_CHANGE:
-                    handlePolicyChangeCommand(commandArr);
+                    this.handlePolicyChangeCommand(commandArr);
                     break;
                 case HELP:
-                    handleHelpCommand();
+                    this.handleHelpCommand();
                     break;
                 case BATCH_JOB:
-                    handleBatchJobCommand(commandArr);
+                    this.handleBatchJobCommand(commandArr);
+                    break;
+                case TEST:
+                    this.handleTestCommand(commandArr);
                     break;
                 default:
                     System.out.println("Sorry, the entered command is not recognized. Please try again or type 'help' for a list of commands.");
@@ -126,17 +138,17 @@ public class UIController {
             String jobName = command[1];
             int jobTime = Integer.parseInt(command[2]) * 1000; // Convert user input from seconds to milliseconds
             int jobPriority = Integer.parseInt(command[3]);
-            LocalDateTime currentDate = LocalDateTime.now();
-            Job userSubmittedJob = new Job(jobName, jobPriority, jobTime, currentDate);
+            LocalDateTime currentDateTime = LocalDateTime.now();
+            Job userSubmittedJob = new Job(jobName, jobPriority, jobTime, currentDateTime);
 
             if (schedulerThread == null){
-                schedulerThread = this.startThread("Scheduler", scheduler);
+                schedulerThread = this.startThread(scheduler);
             }
 
             this.scheduler.addJob(userSubmittedJob);
             System.out.println("Job '" + jobName + "' added to the queue.");
             if (enableDispatcher && dispatcherThread == null) {
-                dispatcherThread = this.startThread("Dispatcher", dispatcher);
+                dispatcherThread = this.startThread(dispatcher);
             }
         } catch (NumberFormatException e) {
             System.out.println("Error: time and priority must be integers. Please try again.");
@@ -158,7 +170,7 @@ public class UIController {
     /**
      * Handles the policy_change command when it is submitted by the user.
      * @param command The commands.
-     * @throws InterruptedException 
+     * @throws InterruptedException throws interrupted exception
      */
     private void handlePolicyChangeCommand(String[] command) throws InterruptedException{
         if(command.length != 2){
@@ -192,7 +204,9 @@ public class UIController {
         System.out.println("Available Commands:");
         System.out.println("run <job name> <job time in seconds> <priority> - Will add a job to the system");
         System.out.println("list - Print out the current job queue.");
-        System.out.println("policy_change <policy> - will change the policy to the new entered one and restructure queue.");
+        System.out.println("policy_change <policy> - Will change the policy to the new entered one and restructure queue.");
+        System.out.println("batch_job <job time in seconds> - Will add a micro benchmark job onto the queue and print out results to a log file.");
+        System.out.println("test <benchmark> <policy> <number of jobs> <priority level> <min CPU time> <max CPU time> - Will run automated performance evaluation on given parameters.");
         System.out.println("exit - End System processes and perform benchmark on close");
     }
 
@@ -215,24 +229,64 @@ public class UIController {
             long jobExecutionTime = Long.parseLong(command[1]) * 1000;
             Job batchJob = new Job(command[0], 1, jobExecutionTime, LocalDateTime.now());
             this.jobQueue.enqueueJob(batchJob);
+        } catch (InterruptedException e) {
+            System.out.println("Error: Could not enqueue batch job: " + e.getMessage());
+        }
+        if (dispatcherThread == null) {
+            dispatcherThread = this.startThread(dispatcher);
+        }
+    }
+
+    /**
+     * Handles the test command when it is submitted by the user.
+     *
+     * @param command The command.
+     */
+    void handleTestCommand(String[] command) {
+        if (command.length != 7) {
+            System.out.println("Invalid test command please try again. \nUsage: test <benchmark> <policy> <number of jobs> <priority level> <min CPU time> <max CPU time>");
+            return;
+        }
+        String benchmarkName = command[1];
+        SchedulingPolicy policy = SchedulingPolicy.valueOf(command[2].toUpperCase());
+        int numJobs = Integer.parseInt(command[3]);
+        int priorityLevels = Integer.parseInt(command[4]);
+        int minCpuTime = Integer.parseInt(command[5]) * 1000; // convert to ms for processing
+        int maxCpuTime = Integer.parseInt(command[6]) * 1000; // convert to ms for processing
+        // create a countdown latch to keep track of the number of jobs that have completed
+        CountDownLatch jobCompletionLatch = new CountDownLatch(numJobs);
+
+        if (schedulerThread == null) {
+            schedulerThread = this.startThread(scheduler);
+        }
+        if (dispatcherThread == null) {
+            dispatcherThread = this.startThread(dispatcher);
+        }
+        this.dispatcher.setIsPerfMode(true);
+        this.dispatcher.setCountdownLatch(jobCompletionLatch);
+        PerfTestParams perfTestParams = new PerfTestParams(benchmarkName, policy, numJobs, priorityLevels, minCpuTime, maxCpuTime);
+        try {
+            this.perfEvaluator.run(perfTestParams);
+            // wait for all jobs to complete before printing metrics
+            jobCompletionLatch.await();
+            this.perfEvaluator.printMetrics();
+        } catch (InterruptedException e) {
+            System.out.println("Error: Could not run performance evaluation: " + e.getMessage());
 
             if (dispatcherThread == null) {
-                dispatcherThread = this.startThread("Dispatcher", dispatcher);
+                dispatcherThread = this.startThread(dispatcher);
             }
         } catch (NumberFormatException ex) {
             System.out.println("Error: execution time must be an integer. Please try again.");
-        } catch (InterruptedException e) {
-            System.out.println("Error: Could not enqueue batch job: " + e.getMessage());
         }
     }
 
     /**
      * Starts a new thread for either dispatcher or scheduler
      *
-     * @param className - The name of the class that the thread is being started for
      * @param runnable  - The runnable object that the thread will execute (scheduler or dispatcher)
      */
-    private Thread startThread(String className, Runnable runnable) {
+    private Thread startThread(Runnable runnable) {
         Thread thread = new Thread(runnable);
         thread.start();
         return thread;

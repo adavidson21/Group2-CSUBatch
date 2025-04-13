@@ -10,5 +10,6 @@ public enum Command {
     HELP,
     EXIT,
     UNKNOWN,
-    BATCH_JOB
+    BATCH_JOB,
+    TEST
 }

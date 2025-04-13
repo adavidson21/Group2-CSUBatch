@@ -20,6 +20,7 @@ public class CommandParser {
             case "policy_change" -> Command.POLICY_CHANGE;
             case "help" -> Command.HELP;
             case "batch_job" -> Command.BATCH_JOB;
+            case "test" -> Command.TEST;
             case "exit" -> Command.EXIT;
             default -> Command.UNKNOWN;
         };
