@@ -37,7 +37,7 @@ public class Scheduler implements Runnable{
             jobQueue.enqueueJob(job);
             switch(policy){
                 case FCFS -> manageFCFS();
-                case Priority -> managePriority();
+                case PRIORITY -> managePriority();
                 case SJF -> manageSJF();
                 default -> {
                 }
@@ -94,7 +94,7 @@ public class Scheduler implements Runnable{
         this.policy = newPolicy;
         switch(policy){
             case FCFS -> manageFCFS();
-            case Priority -> managePriority();
+            case PRIORITY -> managePriority();
             case SJF -> manageSJF();
             default -> {
             }

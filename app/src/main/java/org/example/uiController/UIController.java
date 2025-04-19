@@ -188,7 +188,7 @@ public class UIController {
                     System.out.println("policy change successful");
                     break;
                 case "PRIORITY":
-                    scheduler.setPolicy(SchedulingPolicy.Priority);
+                    scheduler.setPolicy(SchedulingPolicy.PRIORITY);
                     System.out.println("policy change successful");
                     break;
                 default:
