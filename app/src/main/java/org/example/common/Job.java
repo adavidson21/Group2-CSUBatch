@@ -8,6 +8,7 @@ public class Job {
     private final long executionTime;
     private boolean isCompleted = false;
     private final LocalDateTime arrival;
+    private LocalDateTime actualCompletionTime;
 
     public Job(String name, long executionTime) {
         /* Sets the execution priority to 1 (highest priority) by default.
@@ -44,5 +45,13 @@ public class Job {
 
     public void setIsCompleted(boolean isCompleted) {
         this.isCompleted = isCompleted;
+    }
+
+    public void setActualCompletionTime(LocalDateTime actualCompletionTime) {
+        this.actualCompletionTime = actualCompletionTime;
+    }
+
+    public LocalDateTime getActualCompletionTime() {
+        return this.actualCompletionTime;
     }
 }

@@ -6,7 +6,9 @@ import java.util.logging.Handler;
 import java.util.logging.LogManager;
 import java.util.logging.Logger;
 
-
+/**
+ * The FileLogger handles writing micro benchmarks to a log file.
+ */
 public class FileLogger {
     private static final Logger logger = Logger.getLogger(FileLogger.class.getName());
 
