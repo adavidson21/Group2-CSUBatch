@@ -79,7 +79,8 @@ public class UIController {
         while(!"exit".equalsIgnoreCase(commandArr[0])){
             Command command = CommandParser.parseCommand(commandArr[0]);
             if (command == Command.EXIT) {
-                System.out.println("System ending...");
+                System.out.println("EXITING...");
+                this.handleExitCommand();
                 break;
             }
             if (!command.equals(Command.BATCH_JOB)) {
@@ -117,7 +118,7 @@ public class UIController {
                 commandArr = new String[]{" "};  // Set default to avoid array index issues
             }
         }
-        System.out.println("System ending...");
+        this.handleExitCommand();
         // cleanup loose threads
         this.endThread("Dispatcher", dispatcherThread);
         this.endThread("Scheduler", schedulerThread);
@@ -266,7 +267,7 @@ public class UIController {
         this.dispatcher.setCountdownLatch(jobCompletionLatch);
         PerfTestParams perfTestParams = new PerfTestParams(benchmarkName, policy, numJobs, priorityLevels, minCpuTime, maxCpuTime);
         try {
-            this.perfEvaluator.run(perfTestParams);
+            this.perfEvaluator.runAsPerfTest(perfTestParams);
             // wait for all jobs to complete before printing metrics
             jobCompletionLatch.await();
             this.perfEvaluator.printMetrics();
@@ -278,6 +279,20 @@ public class UIController {
             }
         } catch (NumberFormatException ex) {
             System.out.println("Error: execution time must be an integer. Please try again.");
+        }
+    }
+
+    /**
+     * Handles the exit command when it is submitted by the user.
+     * Checks for perf metric availability and shuts down.
+     */
+    void handleExitCommand() {
+        System.out.println("Checking for perf metric availability and shutting down...");
+        int numOfJobsCompleted = this.perfEvaluator.getCompletedJobs().size();
+        if (numOfJobsCompleted > 0) {
+            this.dispatcher.setIsPerfMode(true);
+            // call performance evaluator if at least one job ran
+            this.perfEvaluator.printMetrics();
         }
     }
 
@@ -301,7 +316,6 @@ public class UIController {
     private void endThread(String className, Thread thread) {
         try {
             if (thread != null) {
-                System.out.printf("%s: Returning thread to resource pool. Exiting process. %n", className);
                 thread.interrupt();
                 thread.join();
             }

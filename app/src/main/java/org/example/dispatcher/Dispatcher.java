@@ -1,14 +1,12 @@
 package org.example.dispatcher;
 
 import java.time.LocalDateTime;
-import java.util.ArrayList;
 import java.util.concurrent.CountDownLatch;
 import java.util.logging.Logger;
 
 import org.example.common.Job;
 import org.example.fileLogger.FileLogger;
 import org.example.perfEvaluator.PerfEvaluator;
-import org.example.perfEvaluator.PerfMetrics;
 import org.example.queueManager.QueueManager;
 
 
@@ -79,7 +77,9 @@ public class Dispatcher implements Runnable {
     void executeJob(Job job) {
         System.out.printf("Dispatcher: executing job: %s.%n", job.getName());
         this.simulateJobDuration(job);
-        System.out.printf("Dispatcher: Job: %s has completed in %d seconds. %n", job.getName(), job.getExecutionTime() / 1000);
+        if (!this.getIsPerfMode()) {
+            System.out.printf("Dispatcher: Job: %s has completed in %d seconds. %n", job.getName(), job.getExecutionTime() / 1000);
+        }
     }
 
     @Override
@@ -103,7 +103,6 @@ public class Dispatcher implements Runnable {
                 }
             } catch(InterruptedException e) {
                 Thread.currentThread().interrupt();
-                System.out.println("Dispatcher: thread interrupted. Exiting process.");
                 isRunning = false;
             }
         }

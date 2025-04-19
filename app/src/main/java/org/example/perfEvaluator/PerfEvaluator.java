@@ -28,7 +28,6 @@ public class PerfEvaluator {
     private void calcResponseTimes() {
         Duration totalResponseDuration = Duration.ZERO;
         Duration maxResponseDuration = Duration.ZERO;
-        System.out.println("Jobs completed size: " + this.completedJobs.size());
         for (Job job : completedJobs) {
             // calculate the average response time
             // response time =  actual completion time - arrival time
@@ -37,7 +36,6 @@ public class PerfEvaluator {
                 maxResponseDuration = responseTime;
             }
             totalResponseDuration = totalResponseDuration.plus(responseTime);
-            System.out.println("current total response duration: " + totalResponseDuration.toSeconds());
         }
         Duration avgResponseTime = totalResponseDuration.dividedBy(completedJobs.size());
         this.perfMetrics.setAverageResponseTime(avgResponseTime.toMillis());
@@ -65,10 +63,17 @@ public class PerfEvaluator {
     public void printMetrics() {
         this.calcResponseTimes();
         this.calcThroughput();
-        System.out.println("Performance metrics for " + testParams.benchmarkName());
+        System.out.println("-------------------------------------------");
+        if (testParams != null && testParams.benchmarkName() != null) {
+            System.out.println("Performance Metrics for " + testParams.benchmarkName().toUpperCase());
+        } else {
+            System.out.println("Performance Metrics for " + this.completedJobs.size() + " Completed Jobs");
+        }
+        System.out.println("-------------------------------------------");
         System.out.println("Average response time: " + this.perfMetrics.getAverageResponseTime() + "ms");
         System.out.println("Max response time: " + this.perfMetrics.getMaxResponseTime() + "ms");
         System.out.println("Throughput: " + this.perfMetrics.getThroughput() + " jobs per second");
+        System.out.println("-------------------------------------------");
     }
 
     public void addCompletedJob(Job job) {
@@ -99,11 +104,11 @@ public class PerfEvaluator {
     }
 
     /**
-     * Run the performance evaluation.
+     * Run the performance evaluation with test jobs for test command.
      *
      * @throws InterruptedException throws if the thread is interrupted
      */
-    public void run(PerfTestParams testParams) throws InterruptedException {
+    public void runAsPerfTest(PerfTestParams testParams) throws InterruptedException {
         // setup
         this.setTestParams(testParams);
         scheduler.setPolicy(this.testParams.policy());
