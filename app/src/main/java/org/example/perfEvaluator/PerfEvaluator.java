@@ -67,9 +67,10 @@ public class PerfEvaluator {
         if (testParams != null && testParams.benchmarkName() != null) {
             System.out.println("Performance Metrics for " + testParams.benchmarkName().toUpperCase());
         } else {
-            System.out.println("Performance Metrics for " + this.completedJobs.size() + " Completed Jobs");
+            System.out.println("Performance Metrics for Completed Jobs");
         }
         System.out.println("-------------------------------------------");
+        System.out.println("Total number of jobs completed: " + this.completedJobs.size());
         System.out.println("Average response time: " + this.perfMetrics.getAverageResponseTime() + "ms");
         System.out.println("Max response time: " + this.perfMetrics.getMaxResponseTime() + "ms");
         System.out.println("Throughput: " + this.perfMetrics.getThroughput() + " jobs per second");
