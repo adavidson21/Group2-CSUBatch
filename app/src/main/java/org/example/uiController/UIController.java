@@ -232,6 +232,8 @@ public class UIController {
             this.jobQueue.enqueueJob(batchJob);
         } catch (InterruptedException e) {
             System.out.println("Error: Could not enqueue batch job: " + e.getMessage());
+        } catch (NumberFormatException ex) {
+            System.out.println("Error: execution time must be an integer. Please try again.");
         }
         if (dispatcherThread == null) {
             dispatcherThread = this.startThread(dispatcher);

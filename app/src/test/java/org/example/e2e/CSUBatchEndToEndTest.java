@@ -36,7 +36,7 @@ public class CSUBatchEndToEndTest extends CSUBatchTestBase {
         assertTrue(output.contains("Error: time and priority must be integers. Please try again."));
 
         assertTrue(output.contains("not recognized"));                      // "invalid input\n"
-        assertTrue(output.contains("System ending..."));                    // "exit\n"
+        assertTrue(output.contains("Checking for perf metric availability and shutting down..."));                    // "exit\n"
     }
 
     @Test
@@ -71,7 +71,7 @@ public class CSUBatchEndToEndTest extends CSUBatchTestBase {
         assertTrue(jobAPosSJF >= 0);
         assertTrue(jobBPosSJF < jobAPosSJF); // Validate jobB comes before jobA
 
-        int priorityPolicyIndex = output.indexOf("Scheduling Policy: Priority");
+        int priorityPolicyIndex = output.indexOf("Scheduling Policy: PRIORITY");
         assertTrue(priorityPolicyIndex >= 0); // Validate change to priority
 
         String afterPriorityOutput = output.substring(priorityPolicyIndex);
@@ -83,6 +83,6 @@ public class CSUBatchEndToEndTest extends CSUBatchTestBase {
         assertTrue(jobBPosPriority >= 0);
         assertTrue(jobAPosPriority < jobBPosPriority); // Validate jobA comes before jobB
 
-        assertTrue(output.contains("System ending..."));
+        assertTrue(output.contains("Checking for perf metric availability and shutting down..."));
     }
 }
