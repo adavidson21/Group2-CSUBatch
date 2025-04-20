@@ -2,6 +2,7 @@ package org.example.dispatcher;
 
 import org.example.common.Job;
 import org.example.queueManager.QueueManager;
+import org.example.perfEvaluator.PerfEvaluator;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -14,12 +15,13 @@ import static org.mockito.Mockito.*;
 public class DispatcherTest {
     private QueueManager queueManager;
     private Dispatcher dispatcher;
+    private PerfEvaluator perfEvaluator = mock(PerfEvaluator.class);
 
     @BeforeEach
     public void setUp() {
         //initialize what the dispatcher needs to run
         queueManager = mock(QueueManager.class);
-        dispatcher = new Dispatcher(queueManager);
+        dispatcher = new Dispatcher(queueManager, perfEvaluator);
     }
 
     @AfterAll

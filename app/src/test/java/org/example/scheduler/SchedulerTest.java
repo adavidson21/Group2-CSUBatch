@@ -74,7 +74,7 @@ public class SchedulerTest {
         scheduler.addJob(jobHighPriority);
 
         // Change policy to Priority
-        scheduler.setPolicy(SchedulingPolicy.Priority);
+        scheduler.setPolicy(SchedulingPolicy.PRIORITY);
 
         // Act
         Job firstOut = queueManager.dequeueJob();
