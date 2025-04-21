@@ -37,9 +37,11 @@ public class PerfEvaluator {
             }
             totalResponseDuration = totalResponseDuration.plus(responseTime);
         }
-        Duration avgResponseTime = totalResponseDuration.dividedBy(completedJobs.size());
-        this.perfMetrics.setAverageResponseTime(avgResponseTime.toMillis());
-        this.perfMetrics.setMaxResponseTime(maxResponseDuration.toMillis());
+        if(!completedJobs.isEmpty()){
+            Duration avgResponseTime = totalResponseDuration.dividedBy(completedJobs.size());
+            this.perfMetrics.setAverageResponseTime(avgResponseTime.toMillis());
+            this.perfMetrics.setMaxResponseTime(maxResponseDuration.toMillis());
+        }
     }
 
     private void calcThroughput() {
