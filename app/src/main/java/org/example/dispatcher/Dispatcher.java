@@ -39,6 +39,7 @@ public class Dispatcher implements Runnable {
      */
     void simulateJobDuration(Job job) {
         try {
+            job.setActualProcessingStartTime(LocalDateTime.now());
             Thread.sleep(job.getExecutionTime()); // user input is in seconds, convert to milliseconds
         } catch (InterruptedException e) {
             Thread.currentThread().interrupt();
