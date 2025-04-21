@@ -28,18 +28,33 @@ public class PerfEvaluator {
     private void calcResponseTimes() {
         Duration totalResponseDuration = Duration.ZERO;
         Duration maxResponseDuration = Duration.ZERO;
+        Duration totalWaitDuration = Duration.ZERO;
+        Duration totalTurnaroundDuration = Duration.ZERO;
         for (Job job : completedJobs) {
             // calculate the average response time
             // response time =  actual completion time - arrival time
-            Duration responseTime = Duration.between(job.getArrivalTime(), job.getActualCompletionTime());
+            Duration turnaroundTime = Duration.between(job.getArrivalTime(), job.getActualCompletionTime());
+            Duration responseTime = Duration.between(job.getArrivalTime(), job.getActualProcessingStartTime());
             if (responseTime.compareTo(maxResponseDuration) > 0) {
                 maxResponseDuration = responseTime;
             }
             totalResponseDuration = totalResponseDuration.plus(responseTime);
+
+            // calc wait time
+            Duration executionDuration = Duration.ofMillis(job.getExecutionTime());
+            Duration jobWaitDuration = turnaroundTime.minus(executionDuration);
+            totalWaitDuration = totalWaitDuration.plus(jobWaitDuration);
+
+            // calc turnaround time
+            totalTurnaroundDuration = totalTurnaroundDuration.plus(turnaroundTime);
         }
         Duration avgResponseTime = totalResponseDuration.dividedBy(completedJobs.size());
+        Duration avgWaitTime = totalWaitDuration.dividedBy(completedJobs.size());
+        Duration avgTurnaroundTime = totalTurnaroundDuration.dividedBy(completedJobs.size());
         this.perfMetrics.setAverageResponseTime(avgResponseTime.toMillis());
         this.perfMetrics.setMaxResponseTime(maxResponseDuration.toMillis());
+        this.perfMetrics.setAverageWaitTime(avgWaitTime.toMillis());
+        this.perfMetrics.setAverageTurnaroundTime(avgTurnaroundTime.toMillis());
     }
 
     private void calcThroughput() {
@@ -71,8 +86,10 @@ public class PerfEvaluator {
         }
         System.out.println("-------------------------------------------");
         System.out.println("Total number of jobs completed: " + this.completedJobs.size());
-        System.out.println("Average response time: " + this.perfMetrics.getAverageResponseTime() + "ms");
-        System.out.println("Max response time: " + this.perfMetrics.getMaxResponseTime() + "ms");
+        System.out.println("Average turnaround time: " + this.perfMetrics.getAverageTurnaroundTime() + "ms");
+        System.out.println("Average response time (CPU Time): " + this.perfMetrics.getAverageResponseTime() + "ms");
+        System.out.println("Max response time (Max CPU Time): " + this.perfMetrics.getMaxResponseTime() + "ms");
+        System.out.println("Average wait time: " + this.perfMetrics.getAverageWaitTime() + "ms");
         System.out.println("Throughput: " + this.perfMetrics.getThroughput() + " jobs per second");
         System.out.println("-------------------------------------------");
     }

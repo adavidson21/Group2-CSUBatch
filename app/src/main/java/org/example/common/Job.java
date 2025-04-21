@@ -9,6 +9,7 @@ public class Job {
     private boolean isCompleted = false;
     private final LocalDateTime arrival;
     private LocalDateTime actualCompletionTime;
+    private LocalDateTime actualProcessingStartTime;
 
     public Job(String name, long executionTime) {
         /* Sets the execution priority to 1 (highest priority) by default.
@@ -53,5 +54,13 @@ public class Job {
 
     public LocalDateTime getActualCompletionTime() {
         return this.actualCompletionTime;
+    }
+
+    public LocalDateTime getActualProcessingStartTime() {
+        return this.actualProcessingStartTime;
+    }
+
+    public void setActualProcessingStartTime(LocalDateTime actualProcessingStartTime) {
+        this.actualProcessingStartTime = actualProcessingStartTime;
     }
 }
