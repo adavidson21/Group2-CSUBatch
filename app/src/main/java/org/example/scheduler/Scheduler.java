@@ -22,6 +22,11 @@ public class Scheduler implements Runnable{
     private final Condition condition = lock.newCondition();
     private SchedulingPolicy policy;
 
+    /**
+     * Scheduler constructor.
+     * @param policy The scheduling policy.
+     * @param queue The queue manager instance.
+     */
     public Scheduler(SchedulingPolicy policy, QueueManager queue) {
         this.policy = policy;
         this.jobQueue = queue;
@@ -29,6 +34,8 @@ public class Scheduler implements Runnable{
 
     /**
      * Adds a new job to the scheduler in a thread-safe manner.
+     * @param job The Job.
+     * @throws InterruptedException An exception when the processing is interrupted.
      */
     public void addJob(Job job) throws InterruptedException {
         lock.lock();
@@ -47,6 +54,10 @@ public class Scheduler implements Runnable{
             lock.unlock();
         }
     }
+
+    /**
+     * Updates the list of jobs.
+     */
     private void updateList(){
         List<Job> jobsToRemove = new ArrayList<>();
         for(Job job : originalList ){
@@ -58,6 +69,11 @@ public class Scheduler implements Runnable{
             originalList.remove(job);
         }
     }
+
+    /**
+     * Manages the first come first serve scheduling policy.
+     * @throws InterruptedException An exception when interrupted.
+     */
     private void manageFCFS() throws InterruptedException{
         updateList();
         jobQueue.empty();
@@ -65,6 +81,11 @@ public class Scheduler implements Runnable{
             jobQueue.enqueueJob(job);
         }
     }
+
+    /**
+     * Manages the shortest job first scheduling policy.
+     * @throws InterruptedException An exception when interrupted.
+     */
     private void manageSJF() throws InterruptedException{
         updateList();
         jobQueue.empty();
@@ -77,6 +98,11 @@ public class Scheduler implements Runnable{
         }
         mutateList.clear();
     }
+
+    /**
+     * Manages the priority scheduling policy.
+     * @throws InterruptedException An exception when interrupted.
+     */
     private void managePriority() throws InterruptedException{
         updateList();
         jobQueue.empty();
@@ -90,6 +116,11 @@ public class Scheduler implements Runnable{
         mutateList.clear();
     }
 
+    /**
+     * Sets the scheduling policy.
+     * @param newPolicy The new scheduling policy to be set.
+     * @throws InterruptedException An exception when interrupted.
+     */
     public void setPolicy(SchedulingPolicy newPolicy ) throws InterruptedException{
         this.policy = newPolicy;
         switch(policy){
@@ -101,12 +132,15 @@ public class Scheduler implements Runnable{
 
         }
     }
+
     /**
      * Stops the scheduler gracefully.
+     * @return The scheduling policy.
      */
     public SchedulingPolicy getPolicy(){
         return policy;
     }
+    
     @Override
     public void run(){
 

@@ -17,51 +17,17 @@ public class PerfEvaluator {
     PerfMetrics perfMetrics = new PerfMetrics();
     ArrayList<Job> completedJobs = new ArrayList<>();
 
+    /**
+     * The PerfEvaluator constructor.
+     * @param scheduler The Scheduler instance.
+     */
     public PerfEvaluator(Scheduler scheduler) {
         this.scheduler = scheduler;
     }
 
-    public void setTestParams(PerfTestParams testParams) {
-        this.testParams = testParams;
-    }
-
-    private void calcResponseTimes() {
-        Duration totalResponseDuration = Duration.ZERO;
-        Duration maxResponseDuration = Duration.ZERO;
-        for (Job job : completedJobs) {
-            // calculate the average response time
-            // response time =  actual completion time - arrival time
-            Duration responseTime = Duration.between(job.getArrivalTime(), job.getActualCompletionTime());
-            if (responseTime.compareTo(maxResponseDuration) > 0) {
-                maxResponseDuration = responseTime;
-            }
-            totalResponseDuration = totalResponseDuration.plus(responseTime);
-        }
-        if(!completedJobs.isEmpty()){
-            Duration avgResponseTime = totalResponseDuration.dividedBy(completedJobs.size());
-            this.perfMetrics.setAverageResponseTime(avgResponseTime.toMillis());
-            this.perfMetrics.setMaxResponseTime(maxResponseDuration.toMillis());
-        }
-    }
-
-    private void calcThroughput() {
-        // must iterate through and get the earliest arrival time
-        LocalDateTime firstJobArrival = completedJobs.stream()
-                .map(Job::getArrivalTime)
-                .min(LocalDateTime::compareTo)
-                .orElseThrow();
-        // similarly, must get the completion time of the final job
-        LocalDateTime lastJobCompletion = completedJobs.stream()
-                .map(Job::getActualCompletionTime)
-                .max(LocalDateTime::compareTo)
-                .orElseThrow();
-        Duration totalJobExecutionDuration = Duration.between(firstJobArrival, lastJobCompletion);
-        // throughput tracked as jobs per second
-        double throughput = completedJobs.size() / (double) totalJobExecutionDuration.toSeconds();
-        throughput = Math.round(throughput * 100.0) / 100.0;
-        this.perfMetrics.setThroughput(throughput);
-    }
-
+    /**
+     * Prints the calculated performance metrics.
+     */
     public void printMetrics() {
         this.calcResponseTimes();
         this.calcThroughput();
@@ -79,12 +45,12 @@ public class PerfEvaluator {
         System.out.println("-------------------------------------------");
     }
 
+    /**
+     * Adds a completed job to the list of completed jobs.
+     * @param job The job.
+     */
     public void addCompletedJob(Job job) {
         this.completedJobs.add(job);
-    }
-
-    public ArrayList<Job> getCompletedJobs() {
-        return this.completedJobs;
     }
 
     /**
@@ -119,5 +85,60 @@ public class PerfEvaluator {
         this.generateJobs();
     }
 
+    //region Getters and Setters
+    public void setTestParams(PerfTestParams testParams) {
+        this.testParams = testParams;
+    }
 
+    public ArrayList<Job> getCompletedJobs() {
+        return this.completedJobs;
+    }
+    //endregion
+
+    /**
+     * Calculates the response times for the completed jobs.
+     * Response time = actual completion time - arrival time
+     */
+    private void calcResponseTimes() {
+        Duration totalResponseDuration = Duration.ZERO;
+        Duration maxResponseDuration = Duration.ZERO;
+
+        for (Job job : completedJobs) {
+            // calculate the average response time
+            // response time =  actual completion time - arrival time
+            Duration responseTime = Duration.between(job.getArrivalTime(), job.getActualCompletionTime());
+            if (responseTime.compareTo(maxResponseDuration) > 0) {
+                maxResponseDuration = responseTime;
+            }
+            totalResponseDuration = totalResponseDuration.plus(responseTime);
+        }
+
+        // Avoid divide by 0 by ensuring there are completed jobs to evaluate.
+        if(!completedJobs.isEmpty()){
+            Duration avgResponseTime = totalResponseDuration.dividedBy(completedJobs.size());
+            this.perfMetrics.setAverageResponseTime(avgResponseTime.toMillis());
+            this.perfMetrics.setMaxResponseTime(maxResponseDuration.toMillis());
+        }
+    }
+
+    /**
+     * Calculates the throughput for the completed jobs.
+     */
+    private void calcThroughput() {
+        // must iterate through and get the earliest arrival time
+        LocalDateTime firstJobArrival = completedJobs.stream()
+                .map(Job::getArrivalTime)
+                .min(LocalDateTime::compareTo)
+                .orElseThrow();
+        // similarly, must get the completion time of the final job
+        LocalDateTime lastJobCompletion = completedJobs.stream()
+                .map(Job::getActualCompletionTime)
+                .max(LocalDateTime::compareTo)
+                .orElseThrow();
+        Duration totalJobExecutionDuration = Duration.between(firstJobArrival, lastJobCompletion);
+        // throughput tracked as jobs per second
+        double throughput = completedJobs.size() / (double) totalJobExecutionDuration.toSeconds();
+        throughput = Math.round(throughput * 100.0) / 100.0;
+        this.perfMetrics.setThroughput(throughput);
+    }
 }

@@ -2,6 +2,9 @@ package org.example.common;
 
 import java.time.LocalDateTime;
 
+/**
+ * A class that represents a Job in the system.
+ */
 public class Job {
     private final String name;
     private final int executionPriority;
@@ -10,23 +13,37 @@ public class Job {
     private final LocalDateTime arrival;
     private LocalDateTime actualCompletionTime;
 
+    /**
+     * Job Constructor.
+     * Sets the execution priority to 1 (highest priority) by default.
+     * In the case where priority is not specified or "Priority" scheduling policy is not used,
+     * this ensures that the priority value does not affect whatever scheduling policy is used.
+     * @param name The name of the job.
+     * @param executionTime The execution time of the job.
+     */
     public Job(String name, long executionTime) {
-        /* Sets the execution priority to 1 (highest priority) by default.
-        In the case where priority is not specified or "Priority" scheduling policy is not used,
-        this ensures that the priority value does not affect whatever scheduling policy is used.
-        */
         this(name, 1, executionTime, null);
     }
 
+    /**
+     * Job Constructor.
+     * @param name The name of the job.
+     * @param executionPriority The execution priority of the job.
+     * @param executionTime The execution time of the job.
+     * @param date The date that represents the arrival (creation) time.
+     */
     public Job(String name, int executionPriority, long executionTime, LocalDateTime date) {
         this.name = name;
         this.executionPriority = executionPriority;
         this.executionTime = executionTime;
         this.arrival = date;
     }
+
+    //region Getters and Setters
     public LocalDateTime getArrivalTime(){
         return this.arrival;
     }
+
     public String getName() {
         return this.name;
     }
@@ -54,4 +71,5 @@ public class Job {
     public LocalDateTime getActualCompletionTime() {
         return this.actualCompletionTime;
     }
+    //endregion
 }
