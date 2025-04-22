@@ -64,7 +64,7 @@ public class QueueManagerTest {
 
     @Test
     @DisplayName("Should block new jobs from being added when queue size limit is reached.")
-    public void QueueManager_QueueFull_ShouldBlockEnqueue() throws InterruptedException, ExecutionException, TimeoutException {
+    public void QueueManager_QueueFull_ShouldBlockEnqueue() throws InterruptedException {
         // Arrange
         ExecutorService executor = Executors.newSingleThreadExecutor();
 
