@@ -61,10 +61,14 @@ public class PerfEvaluator {
             }
             totalResponseDuration = totalResponseDuration.plus(responseTime);
 
+            // calc wait time
+
             Duration executionDuration = Duration.ofMillis(job.getExecutionTime());
             Duration jobWaitDuration = turnaroundTime.minus(executionDuration);
             totalWaitDuration = totalWaitDuration.plus(jobWaitDuration);
 
+
+            // calc turnaround time
             totalTurnaroundDuration = totalTurnaroundDuration.plus(turnaroundTime);
         }
         Duration avgResponseTime = totalResponseDuration.dividedBy(completedJobs.size());
