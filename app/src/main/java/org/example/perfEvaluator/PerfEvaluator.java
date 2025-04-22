@@ -17,19 +17,40 @@ public class PerfEvaluator {
     PerfMetrics perfMetrics = new PerfMetrics();
     ArrayList<Job> completedJobs = new ArrayList<>();
 
+    /**
+     * The PerfEvaluator constructor.
+     * @param scheduler The Scheduler instance.
+     */
     public PerfEvaluator(Scheduler scheduler) {
         this.scheduler = scheduler;
     }
 
+    /**
+     * Prints the calculated performance metrics.
+     */
     public void setTestParams(PerfTestParams testParams) {
         this.testParams = testParams;
     }
 
+    /**
+     * Calculates the response times for the completed jobs.
+     * Response time = actual completion time - arrival time
+     */
     private void calcResponseTimes() {
+        if (completedJobs.isEmpty()) {
+            // Defaults to avoid divide by 0
+            this.perfMetrics.setAverageResponseTime(0);
+            this.perfMetrics.setMaxResponseTime(0);
+            this.perfMetrics.setAverageWaitTime(0);
+            this.perfMetrics.setAverageTurnaroundTime(0);
+            return;
+        }
+
         Duration totalResponseDuration = Duration.ZERO;
         Duration maxResponseDuration = Duration.ZERO;
         Duration totalWaitDuration = Duration.ZERO;
         Duration totalTurnaroundDuration = Duration.ZERO;
+
         for (Job job : completedJobs) {
             // calculate the average response time
             // response time =  actual completion time - arrival time
@@ -40,12 +61,10 @@ public class PerfEvaluator {
             }
             totalResponseDuration = totalResponseDuration.plus(responseTime);
 
-            // calc wait time
             Duration executionDuration = Duration.ofMillis(job.getExecutionTime());
             Duration jobWaitDuration = turnaroundTime.minus(executionDuration);
             totalWaitDuration = totalWaitDuration.plus(jobWaitDuration);
 
-            // calc turnaround time
             totalTurnaroundDuration = totalTurnaroundDuration.plus(turnaroundTime);
         }
         Duration avgResponseTime = totalResponseDuration.dividedBy(completedJobs.size());
@@ -57,6 +76,9 @@ public class PerfEvaluator {
         this.perfMetrics.setAverageTurnaroundTime(avgTurnaroundTime.toMillis());
     }
 
+    /**
+     * Calculates the throughput for the completed jobs.
+     */
     private void calcThroughput() {
         // must iterate through and get the earliest arrival time
         LocalDateTime firstJobArrival = completedJobs.stream()
@@ -70,11 +92,17 @@ public class PerfEvaluator {
                 .orElseThrow();
         Duration totalJobExecutionDuration = Duration.between(firstJobArrival, lastJobCompletion);
         // throughput tracked as jobs per second
-        double throughput = completedJobs.size() / (double) totalJobExecutionDuration.toSeconds();
+        double seconds = totalJobExecutionDuration.toSeconds();
+        double throughput = seconds == 0
+                ? completedJobs.size()
+                : completedJobs.size() / seconds;
         throughput = Math.round(throughput * 100.0) / 100.0;
         this.perfMetrics.setThroughput(throughput);
     }
 
+    /**
+     * Prints the calculated performance metrics.
+     */
     public void printMetrics() {
         this.calcResponseTimes();
         this.calcThroughput();
@@ -94,10 +122,18 @@ public class PerfEvaluator {
         System.out.println("-------------------------------------------");
     }
 
+    /**
+     * Adds a completed job to the list of completed jobs.
+     * @param job The job.
+     */
     public void addCompletedJob(Job job) {
         this.completedJobs.add(job);
     }
 
+    /**
+     * Gets the completed jobs.
+     * @return The completed jobs.
+     */
     public ArrayList<Job> getCompletedJobs() {
         return this.completedJobs;
     }
@@ -133,6 +169,4 @@ public class PerfEvaluator {
         // run the performance evaluation
         this.generateJobs();
     }
-
-
 }
