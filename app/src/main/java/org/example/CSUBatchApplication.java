@@ -7,6 +7,9 @@ import java.util.Scanner;
 
 import org.example.uiController.UIController;
 
+/**
+ * The entry class of the CSUBatch application.
+ */
 public class CSUBatchApplication {
     public String getGreeting() {
         return "System Loading...";

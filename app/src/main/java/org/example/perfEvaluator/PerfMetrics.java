@@ -22,7 +22,6 @@ public class PerfMetrics {
         this.throughput = throughput;
     }
 
-
     public long getMaxResponseTime() {
         return maxResponseTime;
     }

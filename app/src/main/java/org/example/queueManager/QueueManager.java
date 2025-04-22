@@ -17,7 +17,6 @@ public class QueueManager {
   private final Condition notEmpty = lock.newCondition();
   private final Condition notFull = lock.newCondition();
 
-
   /**
    * Adds a job to the queue. Used by Submitter which gets job data from Scheduler.
    * @param job The job to add.
@@ -27,7 +26,7 @@ public class QueueManager {
     //acquire lock
     lock.lock();
     try {
-      while (jobQueue.size() == MAX_QUEUE_CAPACITY) {
+        while (jobQueue.size() == MAX_QUEUE_CAPACITY) {
         // queue is full, must wait for space to become available
         notFull.await();
       }
@@ -64,14 +63,9 @@ public class QueueManager {
     }
   }
 
-    /**
-     * Gets the current size of the queue.
-     * @return The size of the queue.
-     */
-  public int getQueueSize() {
-    return jobQueue.size();
-  }
-
+  /**
+   * Lists the jobs in the queue.
+   */
   public void listQueue() {
     if (!jobQueue.isEmpty()) {
       int i = 1;
@@ -84,11 +78,28 @@ public class QueueManager {
       System.out.println("Queue Currently Empty.");
     }
   }
+
+  /**
+   * Empties the job queue.
+   */
   public void empty(){
     jobQueue.clear();
   }
+
+  /**
+   * Checks if a job is already in the queue.
+   * @param job The Job.
+   * @return Whether the job is in the job queue.
+   */
   public boolean checkForJob(Job job){
     return jobQueue.contains(job);
   }
 
+  /**
+   * Gets the current size of the queue.
+   * @return The size of the queue.
+   */
+  public int getQueueSize() {
+    return jobQueue.size();
+  }
 }

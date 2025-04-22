@@ -60,13 +60,11 @@ public class UIController {
      * Prints the initial welcome and instructions for the application.
      */
     public void generateUI() {
-
         System.out.println("Welcome to the CSUBatch Scheduling Application");
         System.out.println("Thank you for downloading.");
         System.out.println("This System is meant to act as a scheduling application where jobs can be added to a queue that will be arranged based \n on the selected priority.");
         System.out.println("Commands: run, list, policy_change, batch_job, test, help, exit");
     }
-
 
     /**
      * User interaction handler that parses commands as they are inputted by the user.
@@ -76,6 +74,7 @@ public class UIController {
         System.out.println("Please Enter a Command:");
         String commandLine = userInput.nextLine();
         String[] commandArr = commandLine.split(" "); //an array in place so the commands that are more than one word can be parsed.
+
         while(!"exit".equalsIgnoreCase(commandArr[0])){
             Command command = CommandParser.parseCommand(commandArr[0]);
             if (command == Command.EXIT) {
@@ -118,7 +117,9 @@ public class UIController {
                 commandArr = new String[]{" "};  // Set default to avoid array index issues
             }
         }
+
         this.handleExitCommand();
+        
         // cleanup loose threads
         this.endThread("Dispatcher", dispatcherThread);
         this.endThread("Scheduler", schedulerThread);

@@ -23,31 +23,20 @@ public class Dispatcher implements Runnable {
     private boolean isBatchMode = false;
     private boolean isPerfMode = false;
 
+    /**
+     * Dispatcher constructor.
+     * @param queueManager The queue manager instance.
+     * @param perfEvaluator The performance evaluator instance.
+     */
     public Dispatcher(QueueManager queueManager, PerfEvaluator perfEvaluator) {
         this.queueManager = queueManager;
         this.perfEvaluator = perfEvaluator;
     }
 
-    public void setCountdownLatch(CountDownLatch latch) {
-        this.jobCompletionLatch = latch;
-    }
-
-    public void setIsBatchMode(boolean isBatchMode) {
-        this.isBatchMode = isBatchMode;
-    }
-
-    public boolean getIsBatchMode() {
-        return this.isBatchMode;
-    }
-
-    public void setIsPerfMode(boolean isPerfMode) {
-        this.isPerfMode = isPerfMode;
-    }
-
-    public boolean getIsPerfMode() {
-        return this.isPerfMode;
-    }
-
+    /**
+     * Simulates the duration of the job based on its execution time.
+     * @param job The Job.
+     */
     void simulateJobDuration(Job job) {
         try {
             job.setActualProcessingStartTime(LocalDateTime.now());
@@ -65,9 +54,12 @@ public class Dispatcher implements Runnable {
             // add to perfEvaluator for tracking
             this.perfEvaluator.addCompletedJob(job);
         }
-
     }
 
+    /**
+     * Executes the batch job.
+     * @param job The batch Job to execute.
+     */
     void executeBatchJob(Job job) {
         fileLogger.info(String.format("Job %s | Status: Started %n", job.getName()));
         this.simulateJobDuration(job);
@@ -75,6 +67,10 @@ public class Dispatcher implements Runnable {
         fileLogger.info(String.format("Job %s | Status: Completed | Execution Duration: %d seconds. %n", job.getName(), job.getExecutionTime() / 1000));
     }
 
+    /**
+     * Executes a job.
+     * @param job The Job to execute.
+     */
     void executeJob(Job job) {
         System.out.printf("Dispatcher: executing job: %s.%n", job.getName());
         this.simulateJobDuration(job);
@@ -108,4 +104,26 @@ public class Dispatcher implements Runnable {
             }
         }
     }
+
+    //region Getters and Setters
+    public void setCountdownLatch(CountDownLatch latch) {
+        this.jobCompletionLatch = latch;
+    }
+
+    public void setIsBatchMode(boolean isBatchMode) {
+        this.isBatchMode = isBatchMode;
+    }
+
+    public boolean getIsBatchMode() {
+        return this.isBatchMode;
+    }
+
+    public void setIsPerfMode(boolean isPerfMode) {
+        this.isPerfMode = isPerfMode;
+    }
+
+    public boolean getIsPerfMode() {
+        return this.isPerfMode;
+    }
+    //endregion
 }
