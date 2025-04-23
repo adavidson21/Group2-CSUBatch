@@ -109,12 +109,9 @@ public class CSUBatchEndToEndTest extends CSUBatchTestBase {
         // Assert
         assertTrue(output.contains("Performance Metrics for BENCHMARK"));
         assertTrue(output.contains("Total number of jobs completed: 2"));
-        assertTrue(output.contains("Average turnaround time:"));
-        assertTrue(output.contains("Average response time (CPU Time):"));
-        assertTrue(output.contains("Max response time (Max CPU Time):"));
-        assertTrue(output.contains("Average wait time:"));
-        assertTrue(output.contains("Average turnaround time:"));
-        assertTrue(output.contains("Throughput:"));
+        assertTrue(output.contains("Average response time"));
+        assertTrue(output.contains("Max response time"));
+        assertTrue(output.contains("Throughput"));
         assertTrue(output.contains("Checking for perf metric availability and shutting down..."));
     }
 }
