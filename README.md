@@ -52,10 +52,6 @@ When the program is running, use command `help` for a list of supported commands
 * 1.0
     * Initial Release
 
-## License
-
-This project is licensed under the [NAME HERE] License - see the LICENSE.md file for details
-
 ## Acknowledgments
 
 Project Management:
